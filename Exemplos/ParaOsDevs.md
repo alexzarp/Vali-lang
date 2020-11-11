@@ -1,0 +1,1 @@
+# Nesta pasta devem haver exemplos de código, condições, variáveis, etc, para instrução ao usuário da presente liguagem.
