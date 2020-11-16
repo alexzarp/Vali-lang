@@ -1,0 +1,47 @@
+Declaração de variáveis.
+
+inteiro a = 0
+flutuante b = 0.0
+caracter c = "c" ou 'c'
+palavra d = "Exemplo" ou 'Exemplo'
+binario e = true ou false
+
+Declaracao de if 
+
+if:
+SE<espaço obrigatório><quantos espaços o usuário quiser> a<primeira variável> <quantos espaços o usuário quiser> *<condição> <quantos espaços o usuário quiser> b<segunda variável>
+    operação<identação obrigatória>
+    
+    SE <quantos espaços o usuário quiser> a<primeira variável> <quantos espaços o usuário quiser> *<condição> <quantos espaços o usuário quiser> b<segunda variável>
+        operação<identação obrigatória>
+
+else:
+SENAO<espaço obrigatório><quantos espaços o usuário quiser> a<primeira variável> <quantos espaços o usuário quiser> *<condição> <quantos espaços o usuário quiser> b<segunda variável>
+    operação<identação obrigatória>
+
+Operadores
+
+= recebe
+== igual
+!= diferente de
+! nao
+* multiplicação
+/ divisão
+- subtração
++ adição
+% resto (módulo)
+e E
+ou OU
+
+Declaração de loop
+
+while:
+ENQUANTO<espaço obrigatório><quantos espaços o usuário quiser> a<primeira variável> <quantos espaços o usuário quiser> *<condição> <quantos espaços o usuário quiser> b<segunda variável>
+    operação<identação obrigatória>
+
+for:
+PARA<espaço obrigatório><quantos espaços o usuário quiser> a<variável, declaração ou uso>,<virgula>< > a<10<condição> ,<virgula> incremento/decremento
+    operação<identação obrigatória>
+
+    PARA<espaço obrigatório><quantos espaços o usuário quiser> a<variável, declaração ou uso>,<virgula>< > a<10<condição> ,<virgula> incremento/decremento
+        operação<identação obrigatória>
