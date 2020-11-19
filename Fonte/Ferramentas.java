@@ -1,7 +1,9 @@
 package Fonte;
 
 public class Ferramentas {
-    public static void removeEspaco(String str)
+
+    // garante que todas as linhas vão ter 
+    public static String removeEspaco(String str)
     {
         StringBuilder strBuilder = new StringBuilder(); // criado um StringBuilder para poder remover os caracteres especificos
         strBuilder.append(str);
@@ -14,6 +16,6 @@ public class Ferramentas {
                 strBuilder.deleteCharAt(i);
         }
 
-        str = strBuilder.toString();
+        return strBuilder.toString();
     }
 }

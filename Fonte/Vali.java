@@ -20,7 +20,7 @@ public class Vali {
                 contadorDeLinhas++;
                 
                 // formata codigo fonte para facilitar interpretacao
-                Ferramentas.removeEspaco(linha);
+                linha = Ferramentas.removeEspaco(linha);
                 
                 // ignore linhas de comentário
                 // TODO verificar se o comentario realmente começa com //
@@ -29,17 +29,6 @@ public class Vali {
             }
 
             input.close();
-
-
-
-            for (int i = 0; i < contadorDeLinhas; i++) {
-                //System.out.println("Linha " + i + ": " + lines[i]);
-                
-            	if (!linha[i].equals(' ')) {
-                    
-                }
-                
-            }
             
         } catch (Exception e) { 
             if (exe) {
