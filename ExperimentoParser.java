@@ -20,17 +20,18 @@ public class ExperimentoParser {
 
     // expressao generica entre inteiros. esperado qualquer tipo de expressao, terminada em ;
     private int exprecaoAlgebricaEntreInteiros(int numero) {
-        System.out.println("Avaliando a str: " + input);
         int num = 0;
         int numDigitos = 1;
-        // adiciona o num até que encontre um sinal
-        while(!input.startsWith("+") && !input.startsWith("-") && !input.startsWith("/") && !input.startsWith("*") && !input.startsWith(";")) {
-            num += ((int) input.charAt(0) * numDigitos);
+
+        // reconstrói o num até que encontre alguma coisa que não seja número
+        while(Character.isDigit(input.charAt(0))) {
+            num += Integer.parseInt(String.valueOf(input.charAt(0))) * numDigitos;
+            input = input.substring(numDigitos, input.length());
             numDigitos++;
+            
         }
         
         // remove a parte já avaliada da string
-        input = input.substring(numDigitos, input.length());
 
         switch(input.charAt(0))
         {
