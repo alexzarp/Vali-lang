@@ -19,6 +19,7 @@ public class ExperimentoParser {
     }
 
     // expressao generica entre inteiros. esperado qualquer tipo de expressao, terminada em ;
+    // por enquanto, apenas faz operacoes da esquerda para a direita
     private int exprecaoAlgebricaEntreInteiros(int numero) {
         int num = 0;
         int numDigitos = 1;
