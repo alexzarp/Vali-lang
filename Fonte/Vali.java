@@ -18,18 +18,26 @@ public class Vali {
             while (input.hasNextLine()) {
                 String linha = input.nextLine();
                 contadorDeLinhas++;
-                linhas.add(linha);
+                
+                // formata codigo fonte para facilitar interpretacao
+                Ferramentas.removeEspaco(linha);
+                
+                // ignore linhas de comentário
+                // TODO verificar se o comentario realmente começa com //
+                if(!linha.startsWith("//"))
+                    linhas.add(linha);
             }
 
             input.close();
 
+
+
             for (int i = 0; i < contadorDeLinhas; i++) {
-//              System.out.println("Linha " + i + ": " + lines[i]);
+                //System.out.println("Linha " + i + ": " + lines[i]);
                 
             	if (!linha[i].equals(' ')) {
                     
                 }
-
                 
             }
             
@@ -44,18 +52,5 @@ public class Vali {
                 e.printStackTrace();
             }
         }
-    }
-    private void removeEspaco(String str)
-    {
-        boolean ehString = false;
-
-        for(int i = 0; i < str.length(); i++)
-            if(str.charAt(i) == '\"')
-                ehString = !ehString;
-            if(!ehString && str.charAt(i) == ' ')
-                
-
-
-
     }
 }
