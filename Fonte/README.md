@@ -2,6 +2,6 @@
 
 ### A princípio antes de finalizar o projeto, para todo e qualquer teste, o programa deve compilar seguindo a seguinte linha de comando;
 #### Para a compilação:
-`javac *.java -d /Source Class`
+`javac *.java -d /SourceClass`
 #### Para rodar:
-`java /Source Class/Vali`
+`java /SourceClass/Vali`
