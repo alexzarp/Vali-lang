@@ -1,7 +1,12 @@
+package Fonte;
+
 import java.io.File;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
+
+import Fonte.AnalizadorDeTexto;
+
 public class Vali {
     public static void main(String[] args)
     {
@@ -13,6 +18,7 @@ public class Vali {
             if(!args[0].endsWith(".vali")) {
                 exe = true;
             }
+
             Scanner input = new Scanner(arquivo);
 
             while (input.hasNextLine()) {
@@ -27,9 +33,16 @@ public class Vali {
                 if(!linha.startsWith("//"))
                     linhas.add(linha);
             }
-
             input.close();
-            
+
+            for (int i = 0; i < contadorDeLinhas; i++) {
+                //Como o professor disse, toda análise será dentro desse for,
+                //depois até podemos criar uma classe externa que faça isso e seja
+                //chamad aqui.
+                /*AnalizadorDeTexto analiza = new AnalizadorDeTexto();
+                analiza.analizaIf();*/
+                }
+                            
         } catch (Exception e) { 
             if (exe) {
                 System.out.println("Arquivo .vali não encontrado.");
