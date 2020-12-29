@@ -8,14 +8,15 @@ import java.util.ArrayList;
 import Fonte.AnalizadorDeTexto;
 
 public class Vali {
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         boolean exe = false;
         try {
             List<String> linhas = new ArrayList<String>();
             int contadorDeLinhas = 0;
             File arquivo = new File(args[0]);
-            if(!args[0].endsWith(".vali")) {
+            // javac Vali nomeDoArquivo.vali nomeDoOutroArquivo.vali
+            // args[0] args[1]
+            if (!args[0].endsWith(".vali")) {
                 exe = true;
             }
 
@@ -24,26 +25,27 @@ public class Vali {
             while (input.hasNextLine()) {
                 String linha = input.nextLine();
                 contadorDeLinhas++;
-                
+
                 // formata codigo fonte para facilitar interpretacao
                 linha = Ferramentas.removeEspaco(linha);
-                
+
                 // ignore linhas de comentário
                 // TODO verificar se o comentario realmente começa com //
-                if(!linha.startsWith("//"))
+                if (!linha.startsWith("//"))
                     linhas.add(linha);
             }
             input.close();
 
             for (int i = 0; i < contadorDeLinhas; i++) {
-                //Como o professor disse, toda análise será dentro desse for,
-                //depois até podemos criar uma classe externa que faça isso e seja
-                //chamad aqui.
-                /*AnalizadorDeTexto analiza = new AnalizadorDeTexto();
-                analiza.analizaIf();*/
-                }
-                            
-        } catch (Exception e) { 
+                // Como o professor disse, toda análise será dentro desse for,
+                // depois até podemos criar uma classe externa que faça isso e seja
+                // chamad aqui.
+                /*
+                 * AnalizadorDeTexto analiza = new AnalizadorDeTexto(); analiza.analizaIf();
+                 */
+            }
+
+        } catch (Exception e) {
             if (exe) {
                 System.out.println("Arquivo .vali não encontrado.");
             }
