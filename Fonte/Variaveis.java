@@ -1,13 +1,14 @@
-package Fonte;
 
-public class Variaveis {
-    public String nome;
-    public String tipo;
-    public double valorFlutuante;
-    public int valorInteiro;
-    public String valorString;
+//package Fonte;
+import Fonte.TiposPrimitivos;
 
-    public Variaveis () {
-        
+public abstract class Variaveis extends TiposPrimitivos {
+
+    public static int leituraLinha;
+    public String idVariavel = "";
+    public String valorVariavel = "";
+
+    protected boolean tamanhoVariavelId () {
+        if (this.)
     }
 }
