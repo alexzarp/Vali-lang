@@ -1,9 +1,14 @@
 public abstract class Primitivo {
 
-    public Tipo tipo;
-    protected Object valor; // valor pode receber apenas Integer, String, Character, Boolean ou Double. garantir sempre que estas serão as únicas classes!
+    public Tipos tipo;
 
-    public Primitivo(Tipo tipo, Object valor) {
+    // valor pode receber apenas Integer, String, Boolean ou Double.
+    // garantir sempre que estas serão as únicas classes!
+    // além disso, um valor null significa que a variável ainda não foi
+    // inicializada;
+    protected Object valor;
+
+    public Primitivo(Tipos tipo, Object valor) {
         this.tipo = tipo;
         this.valor = valor;
     }

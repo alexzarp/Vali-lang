@@ -1,18 +1,18 @@
-public final class Inteiro extends Variavel {
+public final class Flutuante extends Variavel {
 
-    public Inteiro(String nome, Object valor) throws Exception {
-        super(nome, Tipos.INTEIRO, valor);
+    public Flutuante(String nome, Object valor) throws Exception {
+        super(nome, Tipos.FLUTUANTE, valor);
     }
 
     // troca o valor se ele for do mesmo tipo que o da variável. se não, joga um erro
     public void setValor(Object valor) throws Exception {                                     
-        if(valor.getClass() != Integer.class)
+        if(valor.getClass() != Flutuante.class)
             throw new Exception(); // trocar essa exceção por "tipo incompativel com a variavel na atribuição" ou algo do tipo
         this.valor = valor;
     }
 
     public Tipos getTipo() {
-        return Tipos.INTEIRO;
+        return Tipos.FLUTUANTE;
     }
 
     public Palavra toPalavra() {
@@ -20,8 +20,8 @@ public final class Inteiro extends Variavel {
         return new Palavra(null, valor.toString());
     }
 
-    public Flutuante toFlutuante() {
-        return new Flutuante(null, Double.valueOf(valor.toString()));
+    public Inteiro toInteiro() {
+        return new Inteiro(null, Integer.valueOf(valor.toString()));
     }
 
 }
