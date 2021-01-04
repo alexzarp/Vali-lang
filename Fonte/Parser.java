@@ -54,79 +54,104 @@ public class Parser {
         Matcher comparador;
 
         while(indiceAbsoluto <= comprimentoDoPrograma) {
+
             // regex para algo no formato "palavra palavra(" ou  "palavra("
             comparador = Pattern.compile("(\\s*\\w\\s+){0,1}(\\w*\\s\\()").matcher(input);
             
             // se entrar, é porque encontrou uma chamada ou definição de função (loops inclusive)
             if(comparador.find() && comparador.start(indiceAbsoluto) == 0) {
-                // TODO implementar tratamento de função.
+
+                // TODO verificar se encontrou "enquanto" e implementar
+                // TODO verificar se encontrou "para" e implementar
+                // TODO verificar se encontrou "escaneia" e implementar
+                // TODO verificar se encontrou "imprime" e implementar
+
+                atribuicaoFuncao();
+
                 // ps: lembrar de usar novoEscopo() e removeEscopo() toda vez que chamar uma função
 
             } else {
 
-                /* primeiro, precisamos determinar se é
-                uma criação ou atualização de variável. */
+                atribuicaoVariavel();
 
-                ignoraWhiteSpace();
-
-                // usamos regex para verificar a criação de um inteiro.
-                // incluímos espaços em branco pois "inteiro1", por exemplo, é um nome aceitável de variável em Vali.
-                comparador = Pattern.compile("inteiro\\s").matcher(input);
-                if(comparador.matches() && comparador.find(indiceAbsoluto)) {
-
-                    // não incluímos diretamente o white space nos contadores pois não sabemos qual foi utilizado.
-                    indiceColuna += 7;
-                    indiceAbsoluto += 7;
-
-                    ignoraWhiteSpace();
-
-                    // usamos regex para formatar a saída.
-                    padrao = Pattern.compile("\\w\\s*"); // usamos as mesmas regras para nomeção de variáveis que o Java.
-                    comparador = padrao.matcher(input);
-
-                    // comparamos o índice da próxima incidência de um nome apropriado com o índice atual do programa. se coincidem,
-                    // então a próxima palavra é uma variável de nome aceitável. seria o equivalente de um hasNext() do Scanner, mas
-                    // especificamente para um nome.
-                    if(comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
-
-                        padrao = Pattern.compile("\\w");
-                        comparador = padrao.matcher(input);
-
-                        // age como uma forma de "next()" do Scanner.
-                        String nomeVariavel = comparador.group();
-                        int comprimentoDoNome = nomeVariavel.length();
-                        indiceAbsoluto += comprimentoDoNome;
-                        indiceColuna += comprimentoDoNome;
-                        
-                        padrao = Pattern.compile("\\s*;\\s*");
-                        comparador = padrao.matcher(input);
-
-                        // se entrar aqui, é porque a variável não está recebendo um valor.
-                        if(comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
-                            
-                            Variavel.setVariavel(new Inteiro(nomeVariavel, null));
-
-                            ignoraWhiteSpace();
-                            // comprimento de ";" é 1
-                            indiceAbsoluto++;
-                            indiceColuna++;
-                            ignoraWhiteSpace();
-                        }
-
-
-                    } else // se entrou aqui é porque não é uma atribuição ou chamada de função, então encontrou um caractere inesperado.
-                        throw new Exception(); // TODO escolher tipo apropriado de erro para jogar
-                }
             }
-
-            
         }
 
     }
 
+    // TODO implementar isso.
+    private void atribuicaoFuncao() throws Exception {
+
+    }
+
+    private void atribuicaoVariavel() throws Exception {
+        Pattern padrao;
+        Matcher comparador;
+
+        /* primeiro, precisamos determinar se é
+        uma criação ou atualização de variável. */
+
+        ignoraWhiteSpace();
+
+        // usamos regex para verificar a criação de um inteiro.
+        // incluímos espaços em branco pois "inteiro1", por exemplo, é um nome aceitável de variável em Vali.
+        comparador = Pattern.compile("inteiro\\s").matcher(input);
+        if(comparador.matches() && comparador.find(indiceAbsoluto)) {
+
+            // não incluímos diretamente o white space nos contadores pois não sabemos qual foi utilizado.
+            indiceColuna += 7;
+            indiceAbsoluto += 7;
+
+            ignoraWhiteSpace();
+
+            // usamos regex para formatar a saída.
+            padrao = Pattern.compile("\\w\\s*"); // usamos as mesmas regras para nomeção de variáveis que o Java.
+            comparador = padrao.matcher(input);
+
+            // comparamos o índice da próxima incidência de um nome apropriado com o índice atual do programa. se coincidem,
+            // então a próxima palavra é uma variável de nome aceitável. seria o equivalente de um hasNext() do Scanner, mas
+            // especificamente para um nome.
+            if(comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
+
+                padrao = Pattern.compile("\\w");
+                comparador = padrao.matcher(input);
+
+                // age como uma forma de "next()" do Scanner.
+                String nomeVariavel = comparador.group();
+                int comprimentoDoNome = nomeVariavel.length();
+                indiceAbsoluto += comprimentoDoNome;
+                indiceColuna += comprimentoDoNome;
+                
+                padrao = Pattern.compile("\\s*;\\s*");
+                comparador = padrao.matcher(input);
+
+                // se entrar aqui, é porque a variável não está recebendo um valor (como em "inteiro a;").
+                if(comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
+                    
+                    Variavel.setVariavel(new Inteiro(nomeVariavel, null));
+
+                    ignoraWhiteSpace();
+                    // comprimento de ";" é 1
+                    indiceAbsoluto++;
+                    indiceColuna++;
+                    ignoraWhiteSpace();
+                } else {
+                    padrao = Pattern.compile("\\s*=\\s*");
+                    comparador = padrao.matcher(input);
+
+                    // se entrar aqui, é porque o inteiro realmente receberá um valor (como em "inteiro a = alguma coisa;")
+                    if(comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
+                        ignoraWhiteSpace();
+                        Variavel.setVariavel(new Inteiro(nomeVariavel, avaliaExpressao(Tipos.INTEIRO)));
+                    }
+                }
+            }
+        }
+    }
+
     // pula todos os espaços em branco e trata os contadores
     // conforme qual espaço em branco foi utilizado
-    public void ignoraWhiteSpace() {
+    private void ignoraWhiteSpace() {
         char c = input.charAt(indiceAbsoluto);
         
         while(c == ' ' || c == '\n' || c == '\t') {
@@ -139,6 +164,28 @@ public class Parser {
                 indiceLinha++;
             }
             c = input.charAt(indiceAbsoluto);
+        }
+    }
+
+    // retorna valor(Integer, Boolean, String ou Double)
+    private Object avaliaExpressao(Tipos tipoEsperado) throws Exception {
+
+
+        // usamos o contexto fornecido como parâmetro para avaliar. por hora, vamos assumir que 
+        // type casting não é possível e apenas jogar erros caso o valor seja inválido.
+        switch(tipoEsperado) {
+            case INTEIRO:
+                return new Integer(); // por hora apenas retornamos um inteiro qualquer
+                break;
+            case BINARIO:
+                return new Boolean();
+                break;
+            case PALAVRA:
+                return new String();
+                break;
+            case FLUTUANTE:
+                return new Double();
+                break;
         }
     }
 
