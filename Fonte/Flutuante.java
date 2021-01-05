@@ -4,10 +4,12 @@ public final class Flutuante extends Variavel {
         super(nome, Tipos.FLUTUANTE, valor);
     }
 
-    // troca o valor se ele for do mesmo tipo que o da variável. se não, joga um erro
-    public void setValor(Object valor) throws Exception {                                     
-        if(valor.getClass() != Flutuante.class)
-            throw new Exception(); // trocar essa exceção por "tipo incompativel com a variavel na atribuição" ou algo do tipo
+    // troca o valor se ele for do mesmo tipo que o da variável. se não, joga um
+    // erro
+    public void setValor(Object valor) throws Exception {
+        if (valor.getClass() != Flutuante.class)
+            throw new Exception(); // trocar essa exceção por "tipo incompativel com a variavel na atribuição" ou
+                                   // algo do tipo
         this.valor = valor;
     }
 
@@ -16,7 +18,8 @@ public final class Flutuante extends Variavel {
     }
 
     public Palavra toPalavra() {
-        // nome = null pois o retorno é um literal (isto é, não é atrelado a alguma variável)
+        // nome = null pois o retorno é um literal (isto é, não é atrelado a alguma
+        // variável)
         return new Palavra(null, valor.toString());
     }
 
@@ -25,3 +28,4 @@ public final class Flutuante extends Variavel {
     }
 
 }
+a
