@@ -15,12 +15,12 @@ public final class Flutuante extends Variavel {
         return Tipos.FLUTUANTE;
     }
 
-    public Palavra toPalavra() {
+    public Palavra toPalavra() throws Exception {
         // nome = null pois o retorno é um literal (isto é, não é atrelado a alguma variável)
         return new Palavra(null, valor.toString());
     }
 
-    public Inteiro toInteiro() {
+    public Inteiro toInteiro() throws Exception {
         return new Inteiro(null, Integer.valueOf(valor.toString()));
     }
 
