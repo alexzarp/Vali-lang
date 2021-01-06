@@ -21,9 +21,9 @@ import java.util.regex.Matcher;
     - "*" significa que o valor anterior deve aparecer zero ou mais vezes.
         ex: para "\\s*\\w\\s*", "  abc " é valido e "abc" também 
     - "a{n,m}" significa "a" de n à m ocorrências seguidas */
-        
+
 public class Parser {
-    
+
     // input guarda todo o código fonte em uma única string.
     private String input;
 
@@ -34,7 +34,7 @@ public class Parser {
     private int indiceAbsoluto; // número total de caracteres lidos, incluindo \n.
 
     private int comprimentoDoPrograma;
-    
+
     public Parser(String codigoFonte) {
         setInput(codigoFonte);
         // this.indiceLinha = 0;
@@ -53,7 +53,7 @@ public class Parser {
         // utilizamos expressões regulares para várias verificações ao longo da função.
         Matcher comparador;
 
-        while(indiceAbsoluto <= comprimentoDoPrograma) {
+        while (indiceAbsoluto <= comprimentoDoPrograma) {
 
             // regex para algo no formato "palavra palavra(" ou  "palavra("
             comparador = Pattern.compile("(\\s*\\w\\s+)?(\\w*\\s\\()").matcher(input);
@@ -67,7 +67,8 @@ public class Parser {
 
                 // atribuicaoFuncao();
 
-                // ps: lembrar de usar novoEscopo() e removeEscopo() toda vez que chamar uma função
+                // ps: lembrar de usar novoEscopo() e removeEscopo() toda vez que chamar uma
+                // função
 
             } else {
 
@@ -86,17 +87,20 @@ public class Parser {
         Pattern padrao;
         Matcher comparador;
 
-        /* primeiro, precisamos determinar se é
-        uma criação ou atualização de variável. */
+        /*
+         * primeiro, precisamos determinar se é uma criação ou atualização de variável.
+         */
 
         ignoraWhiteSpace();
 
         // usamos regex para verificar a criação de um inteiro.
-        // incluímos espaços em branco pois "inteiro1", por exemplo, é um nome aceitável de variável em Vali.
+        // incluímos espaços em branco pois "inteiro1", por exemplo, é um nome aceitável
+        // de variável em Vali.
         comparador = Pattern.compile("inteiro\\s").matcher(input);
-        if(comparador.matches() && comparador.find(indiceAbsoluto)) {
+        if (comparador.matches() && comparador.find(indiceAbsoluto)) {
 
-            // não incluímos diretamente o white space nos contadores pois não sabemos qual foi utilizado.
+            // não incluímos diretamente o white space nos contadores pois não sabemos qual
+            // foi utilizado.
             indiceColuna += 7;
             indiceAbsoluto += 7;
 
@@ -106,10 +110,12 @@ public class Parser {
             padrao = Pattern.compile("\\w\\s*"); // usamos as mesmas regras para nomeção de variáveis que o Java.
             comparador = padrao.matcher(input);
 
-            // comparamos o índice da próxima incidência de um nome apropriado com o índice atual do programa. se coincidem,
-            // então a próxima palavra é uma variável de nome aceitável. seria o equivalente de um hasNext() do Scanner, mas
+            // comparamos o índice da próxima incidência de um nome apropriado com o índice
+            // atual do programa. se coincidem,
+            // então a próxima palavra é uma variável de nome aceitável. seria o equivalente
+            // de um hasNext() do Scanner, mas
             // especificamente para um nome.
-            if(comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
+            if (comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
 
                 padrao = Pattern.compile("\\w");
                 comparador = padrao.matcher(input);
@@ -119,13 +125,14 @@ public class Parser {
                 int comprimentoDoNome = nomeVariavel.length();
                 indiceAbsoluto += comprimentoDoNome;
                 indiceColuna += comprimentoDoNome;
-                
+
                 padrao = Pattern.compile("\\s*;\\s*");
                 comparador = padrao.matcher(input);
 
-                // se entrar aqui, é porque a variável não está recebendo um valor (como em "inteiro a;").
-                if(comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
-                    
+                // se entrar aqui, é porque a variável não está recebendo um valor (como em
+                // "inteiro a;").
+                if (comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
+
                     Variavel.setVariavel(new Inteiro(nomeVariavel, null));
 
                     ignoraWhiteSpace();
@@ -143,6 +150,18 @@ public class Parser {
                     }
                 }
             }
+        }
+    }
+
+    // analisa expressões contidas entre parênteses "(a < b)", usado em if e while
+    private void analiseElementar() throws Exception {
+        // ▼▼▼▼▼ isso aqui tem que ter muito mais tratamento, eu ainda não domino a
+        // sintaxe do regex ▼▼▼▼▼
+        boolean elementar = input.matches("(?i)(\\w{1,}\\W{1,}\\w{1,})");
+        if (elementar) {
+            // faça a operação
+        } else {
+            // não é uma assinatura de elementar
         }
     }
 
@@ -240,7 +259,8 @@ public class Parser {
 
     }
 
-    // caso precisemos tratar de alguma forma o código fonte. possivelmente descartável!
+    // caso precisemos tratar de alguma forma o código fonte. possivelmente
+    // descartável!
     public void setInput(String input) {
         this.input = input;
     }
