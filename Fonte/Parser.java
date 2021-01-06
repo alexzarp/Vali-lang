@@ -1,4 +1,5 @@
 import java.util.regex.Pattern;
+
 import java.util.regex.Matcher;
 /*  utilizaremos expressões regulares (regular expressions, ou regex) para facilitar
     a verificação de palavras chave e formatações no código fonte. para isso utilizaremos
@@ -36,10 +37,10 @@ public class Parser {
     
     public Parser(String codigoFonte) {
         setInput(codigoFonte);
-        this.indiceLinha = 0;
-        this.indiceColuna = 0;
-        this.indiceAbsoluto = 0;
-        this.comprimentoDoPrograma = codigoFonte.length();
+        // this.indiceLinha = 0;
+        // this.indiceColuna = 0;
+        // this.indiceAbsoluto = 0;
+        // this.comprimentoDoPrograma = codigoFonte.length();
     }
 
     public void analisa() throws Exception {
@@ -50,30 +51,27 @@ public class Parser {
     private void resolveCorpo() throws Exception {
 
         // utilizamos expressões regulares para várias verificações ao longo da função.
-        Pattern padrao;
         Matcher comparador;
 
         while(indiceAbsoluto <= comprimentoDoPrograma) {
 
             // regex para algo no formato "palavra palavra(" ou  "palavra("
-            comparador = Pattern.compile("(\\s*\\w\\s+){0,1}(\\w*\\s\\()").matcher(input);
+            comparador = Pattern.compile("(\\s*\\w\\s+)?(\\w*\\s\\()").matcher(input);
             
             // se entrar, é porque encontrou uma chamada ou definição de função (loops inclusive)
             if(comparador.find() && comparador.start(indiceAbsoluto) == 0) {
 
-                // TODO verificar se encontrou "enquanto" e implementar
-                // TODO verificar se encontrou "para" e implementar
-                // TODO verificar se encontrou "escaneia" e implementar
-                // TODO verificar se encontrou "imprime" e implementar
+                // verificaSe();
+                // verificaEnquanto();
+                // verificaPara();
 
-                atribuicaoFuncao();
+                // atribuicaoFuncao();
 
                 // ps: lembrar de usar novoEscopo() e removeEscopo() toda vez que chamar uma função
 
             } else {
 
                 atribuicaoVariavel();
-
             }
         }
 
@@ -141,8 +139,7 @@ public class Parser {
 
                     // se entrar aqui, é porque o inteiro realmente receberá um valor (como em "inteiro a = alguma coisa;")
                     if(comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
-                        ignoraWhiteSpace();
-                        Variavel.setVariavel(new Inteiro(nomeVariavel, avaliaExpressao(Tipos.INTEIRO)));
+                        // Variavel.setVariavel(new Inteiro(nomeVariavel, Integer.valueOf(avaliaExpressaoInteiros())));
                     }
                 }
             }
@@ -155,11 +152,11 @@ public class Parser {
         char c = input.charAt(indiceAbsoluto);
         
         while(c == ' ' || c == '\n' || c == '\t') {
-            if(c == ' ' || c == '\t')  {
+            if(c == ' ' || c == '\t') {
                 indiceColuna++;
                 indiceAbsoluto++;
             } else if(c == '\n') { 
-                indiceAbsoluto += indiceColuna;
+                indiceAbsoluto++;
                 indiceColuna = 0;
                 indiceLinha++;
             }
@@ -167,26 +164,80 @@ public class Parser {
         }
     }
 
-    // retorna valor(Integer, Boolean, String ou Double)
-    private Object avaliaExpressao(Tipos tipoEsperado) throws Exception {
+    // esta função recebe uma expressão aritmética simples e retorna o resultado dela, independente variações de espaçamentos.
+    // ex: "21+2*3" retorna 27.
+    // início e fim precisam ser índices absolutos.
+    // TODO implementar parenteses.
+    public int avaliaExpressaoInteiros(int inicio, int fim) throws Exception {
 
+        System.out.println("avaliando " + input.substring(inicio, fim) + " de comprimento " + input.substring(inicio, fim).length());
+        Matcher comparador;
 
-        // usamos o contexto fornecido como parâmetro para avaliar. por hora, vamos assumir que 
-        // type casting não é possível e apenas jogar erros caso o valor seja inválido.
-        switch(tipoEsperado) {
-            case INTEIRO:
-                return new Integer(); // por hora apenas retornamos um inteiro qualquer
-                break;
-            case BINARIO:
-                return new Boolean();
-                break;
-            case PALAVRA:
-                return new String();
-                break;
-            case FLUTUANTE:
-                return new Double();
-                break;
+        ignoraWhiteSpace();
+
+        // procuramos por uma soma ou subtração.
+        comparador = Pattern.compile("[\\+-]").matcher(input);
+        if(comparador.find(inicio) && comparador.end() <= fim) { // encontrou uma soma ou subtração.
+            System.out.println(comparador.group());
+            switch(comparador.group()) {
+                case "+":
+                           // parte esquerda da expressão.
+                    return avaliaExpressaoInteiros(inicio, comparador.start())
+                           // parte direita.
+                           + avaliaExpressaoInteiros(comparador.end(), fim);
+                case "-":
+                           // parte esquerda da expressão.
+                    return avaliaExpressaoInteiros(inicio, comparador.start() - 1)
+                           // parte direita.
+                           - avaliaExpressaoInteiros(comparador.end(), fim);
+                }
         }
+
+        // procuramos por um produto ou divisão (inteira).
+        comparador = Pattern.compile("[\\*/]").matcher(input);
+        if(comparador.find(inicio) && comparador.end() <= fim) { // encontrou uma multiplicação ou divisão.
+            switch(comparador.group()) {
+                case "*":
+                           // parte esquerda da expressão.
+                    return avaliaExpressaoInteiros(inicio, comparador.start())
+                           // parte direita.
+                           * avaliaExpressaoInteiros(comparador.end(), fim);
+                case "-":
+                           // parte esquerda da expressão.
+                    return avaliaExpressaoInteiros(inicio, comparador.start() - 1)
+                           // parte direita.
+                           / avaliaExpressaoInteiros(comparador.end(), fim);
+                }
+        }
+        
+        /* resolvidas todas as operações, podemos apenas tentar
+            avaliar o resultado que temos e retorná-lo. */
+        String valor = input.substring(inicio, fim).trim();
+
+        // primeiro verificamos se o resultado é um literal (número) e retorná-lo se for o caso.
+        comparador = Pattern.compile("\\d").matcher(input);
+        if(comparador.find(indiceAbsoluto))
+            return Integer.parseInt(valor);
+
+        /* resta apenas verificar se é uma chamada de função com retorno
+            inteiro ou uma variável do tipo inteiro. por hora apenas tratamos
+            variáveis e não funções. */
+
+        comparador = Pattern.compile("\\w").matcher(input); // mesmas regras de nomeação do Java.
+        valor = comparador.group();
+        Variavel var = Variavel.getVariavel(valor);
+        
+        // a variável não existe.
+        if(var == null)
+            throw new VariavelInexistente(indiceLinha, indiceColuna);
+        
+        // a variável existe, mas não é um inteiro.
+        if(var.tipo != Tipos.INTEIRO)
+            throw new Exception();
+        
+        // assumimos então que a variável existe e possui valor inteiro.
+        return Integer.parseInt(var.valor.toString());
+
     }
 
     // caso precisemos tratar de alguma forma o código fonte. possivelmente descartável!
