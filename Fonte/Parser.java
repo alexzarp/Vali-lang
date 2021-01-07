@@ -157,7 +157,6 @@ public class Parser {
     }
 
     // analisa expressões contidas entre parênteses "(a < b)", usado em if e while
-<<<<<<< HEAD
     public boolean analiseElementar() throws Exception {
         // // ▼▼▼▼▼ isso aqui tem que ter muito mais tratamento, eu ainda não domino a
         // // sintaxe do regex ▼▼▼▼▼
@@ -183,25 +182,6 @@ public class Parser {
                            avaliaExpressaoInteiros(comparador.end(), input.length());
                 
             }
-=======
-    public void analiseElementar() throws Exception {
-        // ▼▼▼▼▼ isso aqui tem que ter muito mais tratamento, eu ainda não domino a
-        // sintaxe do regex ▼▼▼▼▼
-
-        // Matcher m = p.matcher("trabalho==0"); ←EXEMPLO
-        Pattern p = Pattern.compile("(\\w>|<|==|<=|>=|\\||&|!=\\w)");
-        Matcher condicao = p.matcher(/* Aqui deve haver algum índice, pois isso ainda não faz sentido */input);
-        // comparador.group();
-        // comparador.start();
-        if (condicao.find() /* Quero apenas extratir um boolean aqui, não tenho certeza se é assim */) {
-
-            if (condicao.find() == '<') {
-
-            }
-
-        } else {
-            // não é um condicional
->>>>>>> e86f31f5ff5d5da5254ee529c83e1ec9b298ce9b
         }
         
         throw new Exception();
