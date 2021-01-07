@@ -154,15 +154,34 @@ public class Parser {
     }
 
     // analisa expressões contidas entre parênteses "(a < b)", usado em if e while
-    private void analiseElementar() throws Exception {
-        // ▼▼▼▼▼ isso aqui tem que ter muito mais tratamento, eu ainda não domino a
-        // sintaxe do regex ▼▼▼▼▼
-        boolean elementar = input.matches("(?i)(\\w{1,}\\W{1,}\\w{1,})");
-        if (elementar) {
-            // faça a operação
-        } else {
-            // não é uma assinatura de elementar
+    public boolean analiseElementar() throws Exception {
+        // // ▼▼▼▼▼ isso aqui tem que ter muito mais tratamento, eu ainda não domino a
+        // // sintaxe do regex ▼▼▼▼▼
+        // boolean elementar = input.matches("(?i)(\\w{1,}\\W{1,}\\w{1,})");
+        // if (elementar) {
+        //     // faça a operação
+        // } else {
+        //     // não é uma assinatura de elementar
+        // }
+
+        Matcher comparador = Pattern.compile(">|<|==|<=|>=|\\||&|!=").matcher(input);
+        if(comparador.find()) {
+            String ladoEsquerdo = input.substring(0, comparador.start());
+            String ladoDireito = input.substring(comparador.end(), input.length());
+            System.out.println("comparando " + ladoEsquerdo + " e " + ladoDireito);
+            String operacao = comparador.group();
+            switch(operacao) {
+                case "==":
+                    return avaliaExpressaoInteiros(0, comparador.start()) ==
+                           avaliaExpressaoInteiros(comparador.end(), input.length());
+                case ">":
+                    return avaliaExpressaoInteiros(0, comparador.start()) >
+                           avaliaExpressaoInteiros(comparador.end(), input.length());
+                
+            }
         }
+        
+        throw new Exception();
     }
 
     // pula todos os espaços em branco e trata os contadores
