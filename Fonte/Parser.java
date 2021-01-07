@@ -156,8 +156,8 @@ public class Parser {
         }
     }
 
-        // analisa expressões contidas entre parênteses "(a < b)", usado em if e while
-        public boolean analiseElementar() throws Exception {
+        // analisa expressões contidas entre parênteses "a < b", usado em if e while
+        public boolean analiseElementar(int inicio, int fim) throws Exception {
             // // ▼▼▼▼▼ isso aqui tem que ter muito mais tratamento, eu ainda não domino a
             // // sintaxe do regex ▼▼▼▼▼
             // boolean elementar = input.matches("(?i)(\\w{1,}\\W{1,}\\w{1,})");
@@ -166,43 +166,43 @@ public class Parser {
             // } else {
             //     // não é uma assinatura de elementar
             // }
+            Matcher comparador = Pattern.compile("\\|").matcher(input);
+            if(comparador.find(inicio) && comparador.end() < fim) {
+                return analiseElementar(inicio, comparador.start()) || analiseElementar(comparador.end(), fim);   
+            }
+
+            comparador = Pattern.compile("&").matcher(input);
+            if(comparador.find(inicio) && comparador.end() < fim) {
+                return analiseElementar(inicio, comparador.start()) && analiseElementar(comparador.end(), fim);   
+            }
     
-            Matcher comparador = Pattern.compile(">|<|==|<=|>=|\\||&|!=").matcher(input);
-            if(comparador.find()) {
-                String ladoEsquerdo = input.substring(0, comparador.start());
-                String ladoDireito = input.substring(comparador.end(), input.length());
-                System.out.println("comparando " + ladoEsquerdo + " e " + ladoDireito);
+            comparador = Pattern.compile(">|<|==|<=|>=|!=").matcher(input);
+            if(comparador.find(inicio) && comparador.end() < fim) {
                 String operacao = comparador.group();
 
                 switch (operacao) {
                     case "==":
-                        return avaliaExpressaoInteiros(0, comparador.start()) ==
-                               avaliaExpressaoInteiros(comparador.end(), input.length());
+                        return avaliaExpressaoInteiros(inicio, comparador.start()) ==
+                               avaliaExpressaoInteiros(comparador.end(), fim);
                     case ">":
-                        return avaliaExpressaoInteiros(0, comparador.start()) >
-                               avaliaExpressaoInteiros(comparador.end(), input.length());
+                        return avaliaExpressaoInteiros(inicio, comparador.start()) >
+                               avaliaExpressaoInteiros(comparador.end(), fim);
 
                     case "<": 
-                        return avaliaExpressaoInteiros(0, comparador.start()) <
-                               avaliaExpressaoInteiros(comparador.end(), input.length());
+                        return avaliaExpressaoInteiros(inicio, comparador.start()) <
+                               avaliaExpressaoInteiros(comparador.end(), fim);
                                
                     case "<=": 
-                        return avaliaExpressaoInteiros(0, comparador.start()) <=
-                               avaliaExpressaoInteiros(comparador.end(), input.length());
+                        return avaliaExpressaoInteiros(inicio, comparador.start()) <=
+                               avaliaExpressaoInteiros(comparador.end(), fim);
 
                     case ">=": 
-                        return avaliaExpressaoInteiros(0, comparador.start()) >=
-                               avaliaExpressaoInteiros(comparador.end(), input.length());
-
-                    case "|": 
-                        return;
-                        
-                    case "&":
-                        return;
+                        return avaliaExpressaoInteiros(inicio, comparador.start()) >=
+                               avaliaExpressaoInteiros(comparador.end(), fim);
        
                     case "!=":
-                    return avaliaExpressaoInteiros(0, comparador.start()) !=
-                           avaliaExpressaoInteiros(comparador.end(), input.length());
+                    return avaliaExpressaoInteiros(inicio, comparador.start()) !=
+                           avaliaExpressaoInteiros(comparador.end(), fim);
                 }
             }
             
@@ -239,8 +239,6 @@ public class Parser {
     // TODO implementar parenteses.
     public int avaliaExpressaoInteiros(int inicio, int fim) throws Exception {
 
-        System.out.println("avaliando " + input.substring(inicio, fim) + " de comprimento "
-                + input.substring(inicio, fim).length());
         Matcher comparador;
 
         ignoraWhiteSpace();
@@ -274,7 +272,7 @@ public class Parser {
                             * avaliaExpressaoInteiros(comparador.end(), fim);
                 case "-":
                     // parte esquerda da expressão.
-                    return avaliaExpressaoInteiros(inicio, comparador.start() - 1)
+                    return avaliaExpressaoInteiros(inicio, comparador.start())
                             // parte direita.
                             / avaliaExpressaoInteiros(comparador.end(), fim);
             }
