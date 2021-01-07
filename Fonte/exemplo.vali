@@ -1,0 +1,32 @@
+(2 + var * var2 / (2 + var))
+
+2 + var * var2 / (2 + var)
+
+var * var2 / (2 + var)
+
+var2 / (2 + var)
+
+2 + var
+
+
+
+fun expressao(fim inicio)
+    se parenteses:
+        retorna expressao(acha inicio parenteses, acha fim parenteses)
+    se * ou /:
+        resolve esquerda e expressao(direita)
+    se + ou -
+        resolve esquerda e expressao(direita)
+
+(10-(3+4))*(2+(23-5))
+
+10-(3+4)
+
+(3+4)
+
+3+4
+
+7
+
+
+12+23*3-44*3

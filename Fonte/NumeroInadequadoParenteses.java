@@ -1,8 +1,8 @@
-public class FaltaParenteses extends Erro {
+public class NumeroInadequadoParenteses extends Erro {
     
     private static final long serialVersionUID = 1L;
 
-    public FaltaParenteses(int linha, int coluna) {
+    public NumeroInadequadoParenteses(int linha, int coluna) {
         super(linha, coluna);
     }
 

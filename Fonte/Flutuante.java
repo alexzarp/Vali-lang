@@ -27,4 +27,3 @@ public final class Flutuante extends Variavel {
     }
 
 }
-a

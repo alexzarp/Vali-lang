@@ -15,12 +15,15 @@ public abstract class Variavel extends Primitivo {
     // então é um literal ou índice de um vetor
     private String nome;
 
-    static final String palavrasReservadas[] = {"inteiro", "palavra", "flutuante", "vazio",
-                                                 "para", "enquanto"};
+    protected Object valor;
+
+    static final String palavrasReservadas[] = {"inteiro", "palavra", "flutuante", "vazio", "binario",
+                                                "para", "enquanto", "imprime", "escaneia", "se", "senao"};
 
     public Variavel(String nome, Tipos tipo, Object valor) {
         super(tipo, valor);
         this.nome = nome;
+        this.valor = valor;
     }
     
     abstract void setValor(Object valor) throws Exception;
