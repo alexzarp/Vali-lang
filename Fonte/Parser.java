@@ -159,16 +159,29 @@ public class Parser {
     }
 
     // analisa expressões contidas entre parênteses "(a < b)", usado em if e while
-    private void analiseElementar() throws Exception {
+    public void analiseElementar() throws Exception {
         // ▼▼▼▼▼ isso aqui tem que ter muito mais tratamento, eu ainda não domino a
         // sintaxe do regex ▼▼▼▼▼
-        boolean elementar = input.matches("(?i)(\\w{1,}\\W{1,}\\w{1,})");
-        if (elementar) {
-            // faça a operação
-        } else {
-            // não é uma assinatura de elementar
-        }
+        // Matcher elementar =
+        // Pattern.compile("(?i)\\([a-z]+[<>(={2})(<=)(>=)(\\|{2})(&{2})(!=)]{1,2}[a-z]+\\)").matcher;
+        // boolean elementar =
+        // input.matches("(?i)\\([a-z]+[={2}<=?>=?={2}\\|{2}&{2}(!=)]{1,2}[a-z]+\\)");
+        /*
+         * if (elementar) { if () {
+         * 
+         * } } else { // dizer que isso é falso }
+         */
+
+        Pattern p = Pattern.compile(">|<|==|<=|>=|\\||&|!=");
+        Matcher m = p.matcher("trabalho==0");
+        comparador.group();
+        comparador.start();
     }
+    /*
+     * Matcher comparador =
+     * Pattern.compile("[={2}<=?>=?={2}\\|{2}&{2}(!=)]").matcher();
+     * comparador.group() comparador.start()
+     */
 
     // pula todos os espaços em branco e trata os contadores
     // conforme qual espaço em branco foi utilizado
