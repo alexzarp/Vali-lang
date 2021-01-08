@@ -1,15 +1,12 @@
 public final class Flutuante extends Variavel {
 
-    public Flutuante(String nome, Object valor) throws Exception {
+    public Flutuante(String nome, Object valor) throws Erro {
         super(nome, Tipos.FLUTUANTE, valor);
     }
 
     // troca o valor se ele for do mesmo tipo que o da variável. se não, joga um
     // erro
-    public void setValor(Object valor) throws Exception {
-        if (valor.getClass() != Flutuante.class)
-            throw new Exception(); // trocar essa exceção por "tipo incompativel com a variavel na atribuição" ou
-                                   // algo do tipo
+    public void setValor(Object valor) throws Erro {
         this.valor = valor;
     }
 

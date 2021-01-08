@@ -2,11 +2,11 @@ public class NumeroInadequadoParenteses extends Erro {
     
     private static final long serialVersionUID = 1L;
 
-    public NumeroInadequadoParenteses(int linha, int coluna) {
-        super(linha, coluna);
+    public NumeroInadequadoParenteses(String codigoFonte, int indiceAbsoluto) {
+        super(codigoFonte, indiceAbsoluto);
     }
 
-    public void setNome() {
-        this.nome = "número inadequado de parênteses";
+    public String getNome() {
+        return "número inadequado de parênteses";
     }
 }

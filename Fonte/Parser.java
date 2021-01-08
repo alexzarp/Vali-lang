@@ -25,12 +25,10 @@ import java.util.regex.Matcher;
 public class Parser {
 
     // input guarda todo o código fonte em uma única string.
-    private String input;
+    public String input;
 
     // contadores de caracteres. utilizaremos estes valores para formatar
     // a mensagem de erro em caso de erro, como se fossem cursores.
-    private int indiceLinha;
-    private int indiceColuna;
     private int indiceAbsoluto; // número total de caracteres lidos, incluindo \n.
 
     private int comprimentoDoPrograma;
@@ -40,10 +38,11 @@ public class Parser {
         // this.indiceLinha = 0;
         // this.indiceColuna = 0;
         // this.indiceAbsoluto = 0;
-        // this.comprimentoDoPrograma = codigoFonte.length();
+        this.comprimentoDoPrograma = codigoFonte.length();
     }
 
     public void analisa() throws Exception {
+        Variavel.novoEscopo();
         resolveCorpo();
     }
 
@@ -53,14 +52,14 @@ public class Parser {
         // utilizamos expressões regulares para várias verificações ao longo da função.
         Matcher comparador;
 
-        while (indiceAbsoluto <= comprimentoDoPrograma) {
+        while(indiceAbsoluto <= comprimentoDoPrograma) {
 
             // regex para algo no formato "palavra palavra(" ou "palavra("
             comparador = Pattern.compile("(\\s*\\w\\s+)?(\\w*\\s\\()").matcher(input);
 
             // se entrar, é porque encontrou uma chamada ou definição de função (loops
             // inclusive)
-            if (comparador.find() && comparador.start(indiceAbsoluto) == 0) {
+            if(comparador.find() && comparador.start(indiceAbsoluto) == 0) {
 
                 // verificaSe();
                 // verificaEnquanto();
@@ -80,156 +79,124 @@ public class Parser {
     }
 
     // TODO implementar isso.
-    private void atribuicaoFuncao() throws Exception {
+    private void atribuicaoFuncao() throws Erro {
 
     }
 
-    private void atribuicaoVariavel() throws Exception {
-        Pattern padrao;
+    // resolve atribuições de variáveis, tanto criações quanto alterações.
+    // joga um erro caso não encontre um ;.
+    private void atribuicaoVariavel() throws Erro {
         Matcher comparador;
-
+        Variavel.imprimeVariaveis();
+        
         /*
          * primeiro, precisamos determinar se é uma criação ou atualização de variável.
+         * começamos verificando se há uma criação.
          */
 
         ignoraWhiteSpace();
 
-        // usamos regex para verificar a criação de um inteiro.
+        // verifica primeiramente a criação de um inteiro.
         // incluímos espaços em branco pois "inteiro1", por exemplo, é um nome aceitável
         // de variável em Vali.
         comparador = Pattern.compile("inteiro\\s").matcher(input);
-        if (comparador.matches() && comparador.find(indiceAbsoluto)) {
-
-            // não incluímos diretamente o white space nos contadores pois não sabemos qual
-            // foi utilizado.
-            indiceColuna += 7;
+        if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
             indiceAbsoluto += 7;
 
             ignoraWhiteSpace();
 
             // usamos regex para formatar a saída.
-            padrao = Pattern.compile("\\w\\s*"); // usamos as mesmas regras para nomeção de variáveis que o Java.
-            comparador = padrao.matcher(input);
-
-            // comparamos o índice da próxima incidência de um nome apropriado com o índice
-            // atual do programa. se coincidem,
-            // então a próxima palavra é uma variável de nome aceitável. seria o equivalente
-            // de um hasNext() do Scanner, mas
-            // especificamente para um nome.
-            if (comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
-
-                padrao = Pattern.compile("\\w");
-                comparador = padrao.matcher(input);
-
+            // usamos as mesmas regras para nomeção de variáveis que o Java.
+            comparador = Pattern.compile("[a-zA-Z]+[_0-9]*").matcher(input);
+            
+            // se não encontrar nada, é porque o próximo token é inválido.
+            if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                 // age como uma forma de "next()" do Scanner.
                 String nomeVariavel = comparador.group();
-                int comprimentoDoNome = nomeVariavel.length();
-                indiceAbsoluto += comprimentoDoNome;
-                indiceColuna += comprimentoDoNome;
+                indiceAbsoluto += nomeVariavel.length();
 
-                padrao = Pattern.compile("\\s*;\\s*");
-                comparador = padrao.matcher(input);
+                comparador = Pattern.compile("\\s*;\\s*").matcher(input);
 
                 // se entrar aqui, é porque a variável não está recebendo um valor (como em
                 // "inteiro a;").
-                if (comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
+                if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
 
-                    Variavel.setVariavel(new Inteiro(nomeVariavel, null));
+                    Variavel.setVariavel(new Inteiro(nomeVariavel, null), input, indiceAbsoluto);
 
-                    ignoraWhiteSpace();
-                    // comprimento de ";" é 1
-                    indiceAbsoluto++;
-                    indiceColuna++;
-                    ignoraWhiteSpace();
+                    indiceAbsoluto += comparador.group().length();
+
                 } else {
-                    padrao = Pattern.compile("\\s*=\\s*");
-                    comparador = padrao.matcher(input);
-
+                    comparador = Pattern.compile("=.+;").matcher(input);
                     // se entrar aqui, é porque o inteiro realmente receberá um valor (como em
-                    // "inteiro a = alguma coisa;")
-                    if (comparador.matches() && comparador.start(indiceAbsoluto) == 0) {
-                        // Variavel.setVariavel(new Inteiro(nomeVariavel,
-                        // Integer.valueOf(avaliaExpressaoInteiros())));
+                    // "inteiro a = 23;").
+                    
+                    if (comparador.find(indiceAbsoluto) && comparador.start() == ++indiceAbsoluto) {
+                        
+                        // criamos uma variável e a salvamos na lista de variáveis.
+                        Integer valorInteiro = Integer.valueOf(avaliaExpressaoInteiros(indiceAbsoluto + 1, indiceAbsoluto + comparador.group().length() - 1));
+                        Inteiro i = new Inteiro(nomeVariavel, valorInteiro);
+                        Variavel.setVariavel(i, input, indiceAbsoluto);
+
+                        indiceAbsoluto += comparador.end();
                     }
                 }
             }
         }
     }
 
-        // analisa expressões contidas entre parênteses "a < b", usado em if e while
-        public boolean analiseElementar(int inicio, int fim) throws Exception {
-            // // ▼▼▼▼▼ isso aqui tem que ter muito mais tratamento, eu ainda não domino a
-            // // sintaxe do regex ▼▼▼▼▼
-            // boolean elementar = input.matches("(?i)(\\w{1,}\\W{1,}\\w{1,})");
-            // if (elementar) {
-            //     // faça a operação
-            // } else {
-            //     // não é uma assinatura de elementar
-            // }
-            Matcher comparador = Pattern.compile("\\|").matcher(input);
-            if(comparador.find(inicio) && comparador.end() < fim) {
-                return analiseElementar(inicio, comparador.start()) || analiseElementar(comparador.end(), fim);   
-            }
-
-            comparador = Pattern.compile("&").matcher(input);
-            if(comparador.find(inicio) && comparador.end() < fim) {
-                return analiseElementar(inicio, comparador.start()) && analiseElementar(comparador.end(), fim);   
-            }
-    
-            comparador = Pattern.compile(">|<|==|<=|>=|!=").matcher(input);
-            if(comparador.find(inicio) && comparador.end() < fim) {
-                String operacao = comparador.group();
-
-                switch (operacao) {
-                    case "==":
-                        return avaliaExpressaoInteiros(inicio, comparador.start()) ==
-                               avaliaExpressaoInteiros(comparador.end(), fim);
-                    case ">":
-                        return avaliaExpressaoInteiros(inicio, comparador.start()) >
-                               avaliaExpressaoInteiros(comparador.end(), fim);
-
-                    case "<": 
-                        return avaliaExpressaoInteiros(inicio, comparador.start()) <
-                               avaliaExpressaoInteiros(comparador.end(), fim);
-                               
-                    case "<=": 
-                        return avaliaExpressaoInteiros(inicio, comparador.start()) <=
-                               avaliaExpressaoInteiros(comparador.end(), fim);
-
-                    case ">=": 
-                        return avaliaExpressaoInteiros(inicio, comparador.start()) >=
-                               avaliaExpressaoInteiros(comparador.end(), fim);
-       
-                    case "!=":
-                    return avaliaExpressaoInteiros(inicio, comparador.start()) !=
-                           avaliaExpressaoInteiros(comparador.end(), fim);
-                }
-            }
-            
-            throw new Exception();
+    // analisa expressões booleanas.
+    // TODO tratar variáveis binario e as keywords "verdadeiro" e "falso".
+    public boolean analiseCondicional(int inicio, int fim) throws Erro {
+        // // ▼▼▼▼▼ isso aqui tem que ter muito mais tratamento, eu ainda não domino a
+        // // sintaxe do regex ▼▼▼▼▼
+        // boolean elementar = input.matches("(?i)(\\w{1,}\\W{1,}\\w{1,})");
+        // if (elementar) {
+        //     // faça a operação
+        // } else {
+        //     // não é uma assinatura de elementar
+        // }
+        Matcher comparador = Pattern.compile("\\|").matcher(input);
+        if(comparador.find(inicio) && comparador.end() < fim) {
+            return analiseCondicional(inicio, comparador.start()) || analiseCondicional(comparador.end(), fim);   
         }
-        /*
-         * Matcher comparador =
-         * Pattern.compile("[={2}<=?>=?={2}\\|{2}&{2}(!=)]").matcher();
-         * comparador.group() comparador.start()
-         */
 
-    // pula todos os espaços em branco e trata os contadores
-    // conforme qual espaço em branco foi utilizado
-    private void ignoraWhiteSpace() {
-        char c = input.charAt(indiceAbsoluto);
-
-        while (c == ' ' || c == '\n' || c == '\t') {
-            if (c == ' ' || c == '\t') {
-                indiceColuna++;
-                indiceAbsoluto++;
-            } else if (c == '\n') {
-                indiceAbsoluto++;
-                indiceColuna = 0;
-                indiceLinha++;
-            }
-            c = input.charAt(indiceAbsoluto);
+        comparador = Pattern.compile("&").matcher(input);
+        if(comparador.find(inicio) && comparador.end() < fim) {
+            return analiseCondicional(inicio, comparador.start()) && analiseCondicional(comparador.end(), fim);   
         }
+
+        comparador = Pattern.compile(">|<|==|<=|>=|!=").matcher(input);
+        if(comparador.find(inicio) && comparador.end() < fim) {
+            String operacao = comparador.group();
+
+            switch (operacao) {
+                case "==":
+                    return avaliaExpressaoInteiros(inicio, comparador.start()) ==
+                            avaliaExpressaoInteiros(comparador.end(), fim);
+                case ">":
+                    return avaliaExpressaoInteiros(inicio, comparador.start()) >
+                            avaliaExpressaoInteiros(comparador.end(), fim);
+
+                case "<": 
+                    return avaliaExpressaoInteiros(inicio, comparador.start()) <
+                            avaliaExpressaoInteiros(comparador.end(), fim);
+                            
+                case "<=": 
+                    return avaliaExpressaoInteiros(inicio, comparador.start()) <=
+                            avaliaExpressaoInteiros(comparador.end(), fim);
+
+                case ">=": 
+                    return avaliaExpressaoInteiros(inicio, comparador.start()) >=
+                            avaliaExpressaoInteiros(comparador.end(), fim);
+
+                case "!=":
+                return avaliaExpressaoInteiros(inicio, comparador.start()) !=
+                        avaliaExpressaoInteiros(comparador.end(), fim);
+            }
+        }
+
+        // como não foi encontrado nenhum valor esperado, apenas dizemos que o token é inválido.
+        throw new TokenInesperado(input, indiceAbsoluto);
     }
 
     // esta função recebe uma expressão aritmética simples e retorna o resultado
@@ -237,7 +204,7 @@ public class Parser {
     // ex: "21+2*3" retorna 27.
     // início e fim precisam ser índices absolutos.
     // TODO implementar parenteses.
-    public int avaliaExpressaoInteiros(int inicio, int fim) throws Exception {
+    public int avaliaExpressaoInteiros(int inicio, int fim) throws Erro {
 
         Matcher comparador;
 
@@ -249,12 +216,12 @@ public class Parser {
             System.out.println(comparador.group());
             switch (comparador.group()) {
                 case "+":
-                    // parte esquerda da expressão.
+                           // parte esquerda da expressão.
                     return avaliaExpressaoInteiros(inicio, comparador.start())
                             // parte direita.
                             + avaliaExpressaoInteiros(comparador.end(), fim);
                 case "-":
-                    // parte esquerda da expressão.
+                           // parte esquerda da expressão.
                     return avaliaExpressaoInteiros(inicio, comparador.start() - 1)
                             // parte direita.
                             - avaliaExpressaoInteiros(comparador.end(), fim);
@@ -266,12 +233,12 @@ public class Parser {
         if (comparador.find(inicio) && comparador.end() <= fim) { // encontrou uma multiplicação ou divisão.
             switch (comparador.group()) {
                 case "*":
-                    // parte esquerda da expressão.
+                           // parte esquerda da expressão.
                     return avaliaExpressaoInteiros(inicio, comparador.start())
                             // parte direita.
                             * avaliaExpressaoInteiros(comparador.end(), fim);
                 case "-":
-                    // parte esquerda da expressão.
+                           // parte esquerda da expressão.
                     return avaliaExpressaoInteiros(inicio, comparador.start())
                             // parte direita.
                             / avaliaExpressaoInteiros(comparador.end(), fim);
@@ -301,15 +268,24 @@ public class Parser {
 
         // a variável não existe.
         if (var == null)
-            throw new VariavelInexistente(indiceLinha, indiceColuna);
+            throw new VariavelInexistente(input, indiceAbsoluto);
 
         // a variável existe, mas não é um inteiro.
         if (var.tipo != Tipos.INTEIRO)
-            throw new Exception();
+            throw new AtribuicaoTipoIncompativel(input, indiceAbsoluto);
 
         // assumimos então que a variável existe e possui valor inteiro.
         return Integer.parseInt(var.valor.toString());
 
+    }
+
+    // pula todos os espaços em branco.
+    private void ignoraWhiteSpace() {
+        char c = input.charAt(indiceAbsoluto);
+       while (c == ' ' || c == '\n' || c == '\t') {
+            indiceAbsoluto++;
+            c = input.charAt(indiceAbsoluto);
+        }
     }
 
     // caso precisemos tratar de alguma forma o código fonte. possivelmente
