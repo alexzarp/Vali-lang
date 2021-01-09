@@ -3,30 +3,32 @@ public abstract class Erro extends Exception {
     private static final long serialVersionUID = 1L;
 
     protected int linha;
-    protected int coluna;
-    protected int indiceFormatacao;
+    protected int coluna; 
+    protected int indiceInicioLinha;
+    protected int indiceAbsoluto;
     protected String codigoFonte;
 
     public Erro(String codigoFonte, int indiceAbsoluto) {
         super();
         this.codigoFonte = codigoFonte;
-        setLinhaEColuna(indiceAbsoluto);
+        this.indiceAbsoluto = indiceAbsoluto;
+        setLinhaEColuna();
     }
 
     // percorre pelo código fonte até o índice absoluto e seta
     // os atributos linha e coluna conforme adequado para posterior
     // impressão formatada da linha do código em caso de erro.
-    protected void setLinhaEColuna(int indiceAbsoluto) {
-        this.indiceFormatacao = 0;
+    protected void setLinhaEColuna() {
+        this.indiceInicioLinha = 0;
         this.linha = 0;
         this.coluna = 0;
         int indiceAtual = 0;
         while(indiceAtual <= indiceAbsoluto) {
-            System.out.println("feee");
+            // System.out.println("indiceAtual " + indiceAtual);
             switch(codigoFonte.charAt(indiceAtual)) { 
                 case '\n':
                     linha++;
-                    indiceFormatacao = indiceAtual + 1;
+                    indiceInicioLinha = indiceAtual + 1;
                     coluna = 0;
                     break;
                 default:
@@ -40,20 +42,19 @@ public abstract class Erro extends Exception {
     // imprime a linha de erro, junto a um indicador visual da coluna
     // na qual o erro foi discriminado.
     public void printaLinhaFormatada() {
-        int fimLinha = indiceFormatacao;
+        int indiceAtual = indiceInicioLinha;
         int fimCodigoFonte = codigoFonte.length();
 
         // printa a linha em si.
-        while(fimLinha < fimCodigoFonte && codigoFonte.charAt(fimLinha) != '\n') {
-            System.out.print(codigoFonte.charAt(fimLinha));
+        while(indiceAtual < fimCodigoFonte && codigoFonte.charAt(indiceAtual) != '\n') {
+            System.out.print(codigoFonte.charAt(indiceAtual));
 
-            fimLinha++;
+            indiceAtual++;
         }
 
         System.out.println();
-
         // printa o offset do cursor.
-        for(int i = 0; i < (fimLinha - indiceFormatacao - 1); i++)
+        for(int i = 0; i < (indiceAbsoluto - indiceInicioLinha); i++)
             System.out.print(" ");
         
         // printa o cursor.
@@ -61,7 +62,7 @@ public abstract class Erro extends Exception {
     }
 
     public String toString() {
-        return getNome() + " na linha " + linha + ", coluna " + coluna;
+        return "Erro: [" + getNome() + "] no caractere \"" + codigoFonte.charAt(indiceAbsoluto) + "\" da linha " + linha + ", coluna " + coluna + " (" + (indiceAbsoluto + 1) + "o caractere do codigo fonte, \\n inclusos e contando a partir do 1).";
     }
     
     protected abstract String getNome();
