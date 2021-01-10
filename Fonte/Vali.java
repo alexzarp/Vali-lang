@@ -8,6 +8,7 @@ public class Vali {
             if(args[0].endsWith(".vali")) {
                 Scanner s = new Scanner(Paths.get(args[0]));
                 String codigoFonte = "";
+
                 while(s.hasNextLine()) {
                     codigoFonte += s.nextLine();
                     codigoFonte += "\n";
@@ -15,6 +16,7 @@ public class Vali {
                     
                 // lê o arquivo como uma String.
                 Parser p = new Parser(codigoFonte);
+                // Parser p = new Parser("inteiro a = 2;\nflutuante b = a;");
                 // Parser p = new Parser(Files.readString(Paths.get(args[0]), StandardCharsets.US_ASCII));
                 p.analisa();
                 Variavel.imprimeVariaveis();
@@ -29,7 +31,7 @@ public class Vali {
         } 
         catch(Exception e) {
             System.out.println(e.toString());
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 }

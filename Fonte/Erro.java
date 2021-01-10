@@ -36,6 +36,7 @@ public abstract class Erro extends Exception {
                     break;
             }
             indiceAtual++;
+            
         }
     }
 

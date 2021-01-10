@@ -58,7 +58,6 @@ public abstract class Variavel extends Primitivo {
 
     }
 
-
     // esta função precisa ser chamada toda vez que entramos em um novo escopo,
     // a fim de alterar a visibilidade das variáveis que serão criadas.
     public static void novoEscopo() {
