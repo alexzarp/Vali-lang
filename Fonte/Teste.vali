@@ -1,0 +1,4 @@
+inteiro a = 5;
+inteiro b = 10;
+flutuante c = 3.10;
+a = b;
