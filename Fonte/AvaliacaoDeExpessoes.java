@@ -14,8 +14,8 @@ public class AvaliacaoDeExpessoes {
 
         tools.ignoraWhiteSpace();
 
-        // procuramos por uma soma ou subtração.
-        comparador = Pattern.compile("[\\+-]").matcher(Vali.codigoFonte);
+        // procuramos por uma soma ou subtração.                                      estou em dúvida se esta variável pode ser a mesma
+        comparador = Pattern.compile("[\\+-]").matcher(Parser.getCodigoFonte()); //←  no Parser e no Vali, da mesma forma, na linha 36
         if (comparador.find(inicio) && comparador.end() <= fim) { // encontrou uma soma ou subtração.
             int parteEsquerda, parteDireita;
             switch (comparador.group()) {
@@ -33,7 +33,7 @@ public class AvaliacaoDeExpessoes {
         }
 
         // procuramos por um produto ou divisão (inteira).
-        comparador = Pattern.compile("[\\*/]").matcher(Vali.codigoFonte);
+        comparador = Pattern.compile("[\\*/]").matcher(Parser.getCodigoFonte());
         if (comparador.find(inicio) && comparador.end() <= fim) { // encontrou uma multiplicação ou divisão.
             int parteEsquerda, parteDireita;
             switch (comparador.group()) {

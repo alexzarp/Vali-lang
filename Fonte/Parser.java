@@ -23,8 +23,8 @@ import java.util.regex.Matcher;
         
 public class Parser {
     // instancia das classes externas
-    /*Escopo escopo = new Escopo();
-    AtribuicaoVariavel atribuicao = new AtribuicaoVariavel();
+    Escopo escopo = new Escopo();
+    /*AtribuicaoVariavel atribuicao = new AtribuicaoVariavel();
     Tools tools = new Tools();
     Condicoes condicoes = new Condicoes();*/
             
@@ -40,10 +40,13 @@ public class Parser {
     public static void setCodigoFonte(String codigoFontee) {
         codigoFonte = codigoFontee;
     }
+    public static void sumCodigoFonte (String sum) {
+        codigoFonte += sum;
+    }
 
 
 
-    
+
     // contadores de caracteres. utilizaremos estes valores para formatar
     // a mensagem de erro em caso de erro, como se fossem cursores.
     private static int indiceAbsoluto; // número total de caracteres lidos, incluindo \n.
@@ -53,6 +56,9 @@ public class Parser {
     public static void setIndiceAbsoluto (int indiceAbsolutoo) {
         indiceAbsoluto = indiceAbsolutoo;
     }
+    public static void sumIndiceAbsoluto (int sum) {
+        indiceAbsoluto += sum;
+    }
     //---------------------------------------------------------------------------------------
     private static int comprimentoDoPrograma;
     public static int getComprimentoDoPrograma () {
@@ -61,13 +67,18 @@ public class Parser {
     public static void setComprimentoDoPrograma (int comprimentoDoProgramaa) {
         comprimentoDoPrograma = comprimentoDoProgramaa;
     }
+    public static void sumComprimentoDoPrograma (int sum) {
+        comprimentoDoPrograma += sum;
+    }
    
 
 
     public Parser(String codigoFonte) {
         setCodigoFonte(codigoFonte);
-        this.indiceAbsoluto = 0;
-        this.comprimentoDoPrograma = codigoFonte.length();
+        setIndiceAbsoluto(0);
+        //this.indiceAbsoluto = 0;
+        setComprimentoDoPrograma(codigoFonte.length());
+        //this.comprimentoDoPrograma = codigoFonte.length();
     }
 
     public void analisa() throws Erro {
