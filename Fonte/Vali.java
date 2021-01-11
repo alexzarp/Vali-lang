@@ -2,6 +2,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
+
 public class Vali {
     public static String codigoFonte;
     public static void main(String[] args) {

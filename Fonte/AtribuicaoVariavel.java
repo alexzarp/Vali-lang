@@ -2,6 +2,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 public class AtribuicaoVariavel {
+    Tools tools = new Tools();
     // resolve atribuições de variáveis, tanto criações quanto alterações.
     // joga um erro caso não encontre um ;.
 
@@ -23,7 +24,7 @@ public class AtribuicaoVariavel {
         if(comparador.find(Parser.indiceAbsoluto) && comparador.start() == Parser.indiceAbsoluto) {
             Parser.indiceAbsoluto += 7;
 
-            ignoraWhiteSpace();
+            tools.ignoraWhiteSpace();
 
             // usamos regex para formatar a saída.
             // usamos as mesmas regras para nomeção de variáveis que o Java.
@@ -47,7 +48,7 @@ public class AtribuicaoVariavel {
                     return true;
 
                 } else {
-                    ignoraWhiteSpace();
+                    tools.ignoraWhiteSpace();
                     comparador = Pattern.compile("=[^;]+;").matcher(Vali.codigoFonte);
                     // se entrar aqui, é porque o inteiro realmente receberá um valor (como em
                     // "inteiro a = 23;").
@@ -58,7 +59,7 @@ public class AtribuicaoVariavel {
                         Integer valorInteiro = Integer.valueOf(avaliaExpressaoDeInteiros(Parser.indiceAbsoluto, comparador.end() - 2));
                         Inteiro i = new Inteiro(nomeVariavel, valorInteiro);
                         Variavel.setVariavel(i, Vali.codigoFonte, Parser.indiceAbsoluto);
-                        ignoraWhiteSpace();
+                        tools.ignoraWhiteSpace();
                         
                         Parser.indiceAbsoluto++; // considerando ";"
                         //System.out.println(Vali.codigoFonte.charAt(Parser.indiceAbsoluto));
@@ -71,7 +72,7 @@ public class AtribuicaoVariavel {
             if(comparador.find(Parser.indiceAbsoluto) && comparador.start() == Parser.indiceAbsoluto) {
                 Parser.indiceAbsoluto += 9;
 
-                ignoraWhiteSpace();
+                tools.ignoraWhiteSpace();
 
                 // usamos regex para formatar a saída.
                 // usamos as mesmas regras para nomeção de variáveis que o Java.
@@ -95,7 +96,7 @@ public class AtribuicaoVariavel {
                         return true;
 
                     } else {
-                        ignoraWhiteSpace();
+                        tools.ignoraWhiteSpace();
                         comparador = Pattern.compile("=[^;]+;").matcher(Vali.codigoFonte);
                         // se entrar aqui, é porque o inteiro realmente receberá um valor (como em
                         // "inteiro a = 23;").
@@ -106,7 +107,7 @@ public class AtribuicaoVariavel {
                             Double valorFlutuante = Double.valueOf(avaliaExpressaoDeFlutuantes(Parser.indiceAbsoluto, comparador.end() - 2));
                             Flutuante i = new Flutuante(nomeVariavel, valorFlutuante);
                             Variavel.setVariavel(i, Vali.codigoFonte, Parser.indiceAbsoluto);
-                            ignoraWhiteSpace();
+                            tools.ignoraWhiteSpace();
                             Parser.indiceAbsoluto++; // considerando ";"
                             return true;
                         }
