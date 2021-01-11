@@ -21,12 +21,12 @@ public class AvaliacaoDeExpessoes {
             switch (comparador.group()) {
                 case "+":
                     parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
-                    Parser.indiceAbsoluto++;
+                    Parser.sumIndiceAbsoluto(1);
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
                     return parteDireita + parteEsquerda;
                 case "-":
                     parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
-                    Parser.indiceAbsoluto++;
+                    Parser.sumIndiceAbsoluto(1);
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
                     return parteDireita - parteEsquerda;
             }
@@ -39,12 +39,12 @@ public class AvaliacaoDeExpessoes {
             switch (comparador.group()) {
                 case "*":
                     parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
-                    Parser.indiceAbsoluto++;
+                    Parser.sumIndiceAbsoluto(1);
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
                     return parteDireita * parteEsquerda;
                 case "/":
                     parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
-                    Parser.indiceAbsoluto++;
+                    Parser.sumIndiceAbsoluto(1);
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
                     return parteDireita / parteEsquerda;
             }
@@ -54,14 +54,14 @@ public class AvaliacaoDeExpessoes {
          * resolvidas todas as operações, podemos apenas tentar avaliar o resultado que
          * temos e retorná-lo.
          */
-        String valor = Vali.codigoFonte.substring(inicio, fim + 1).trim();
+        String valor = Parser.getCodigoFonte().substring(inicio, fim + 1).trim();
 
         // primeiro verificamos se o resultado é um literal (número) e retorná-lo se for
         // o caso.
-        comparador = Pattern.compile("\\s*\\d\\s*").matcher(Vali.codigoFonte);
-        if(comparador.find(Parser.indiceAbsoluto)) {
+        comparador = Pattern.compile("\\s*\\d\\s*").matcher(Parser.getCodigoFonte());
+        if(comparador.find(Parser.getIndiceAbsoluto())) {
             int resultado = Integer.parseInt(valor);
-            Parser.indiceAbsoluto += comparador.group().length();
+            Parser.sumIndiceAbsoluto(comparador.group().length());
             return resultado;
         }
 
@@ -70,22 +70,22 @@ public class AvaliacaoDeExpessoes {
          * variável do tipo inteiro. por hora apenas tratamos variáveis e não funções.
          */
 
-        comparador = Pattern.compile("\\s*\\w\\s*").matcher(Vali.codigoFonte); // mesmas regras de nomeação do Java.
-        comparador.find(Parser.indiceAbsoluto);
+        comparador = Pattern.compile("\\s*\\w\\s*").matcher(Parser.getCodigoFonte()); // mesmas regras de nomeação do Java.
+        comparador.find(Parser.getIndiceAbsoluto());
         valor = comparador.group();
         Variavel var = Variavel.getVariavel(valor.trim());
 
         // a variável não existe.
         if (var == null)
-            throw new VariavelInexistente(Vali.codigoFonte, Parser.indiceAbsoluto);
+            throw new VariavelInexistente(Parser.getCodigoFonte(), Parser.getIndiceAbsoluto());
 
         // a variável existe, mas não é um inteiro.
         if (var.tipo != Tipos.INTEIRO)
-            throw new AtribuicaoTipoIncompativel(Vali.codigoFonte, Parser.indiceAbsoluto);
+            throw new AtribuicaoTipoIncompativel(Parser.getCodigoFonte(), Parser.getIndiceAbsoluto());
 
         // assumimos então que a variável existe e possui valor inteiro.
         
-        Parser.indiceAbsoluto += comparador.group().length();
+        Parser.sumIndiceAbsoluto(comparador.group().length());
         return Integer.parseInt(var.valor.toString());
     }
 
@@ -97,53 +97,53 @@ public class AvaliacaoDeExpessoes {
             tools.ignoraWhiteSpace();
     
             // procuramos por uma soma ou subtração.
-            comparador = Pattern.compile("[\\+-]").matcher(Vali.codigoFonte);
+            comparador = Pattern.compile("[\\+-]").matcher(Parser.getCodigoFonte());
             if (comparador.find(inicio) && comparador.end() <= fim) { // encontrou uma soma ou subtração.
                 double parteEsquerda, parteDireita;
                 switch (comparador.group()) {
                     case "+":
                         parteEsquerda = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
-                        Parser.indiceAbsoluto++;
+                        Parser.sumIndiceAbsoluto(1);
                         parteDireita = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
                         return parteDireita + parteEsquerda;
                     case "-":
                         parteEsquerda = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
-                        Parser.indiceAbsoluto++;
+                        Parser.sumIndiceAbsoluto(1);
                         parteDireita = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
                         return parteDireita - parteEsquerda;
                 }
             }
     
             // procuramos por um produto ou divisão (inteira).
-            comparador = Pattern.compile("[\\*/]").matcher(Vali.codigoFonte);
+            comparador = Pattern.compile("[\\*/]").matcher(Parser.getCodigoFonte());
             if (comparador.find(inicio) && comparador.end() <= fim) { // encontrou uma multiplicação ou divisão.
                 double parteEsquerda, parteDireita;
                 switch (comparador.group()) {
                     case "*":
                         parteEsquerda = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
-                        Parser.indiceAbsoluto++;
+                        Parser.sumIndiceAbsoluto(1);
                         parteDireita = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
                         return parteDireita * parteEsquerda;
                     case "/":
                         parteEsquerda = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
-                        Parser.indiceAbsoluto++;
+                        Parser.sumIndiceAbsoluto(1);
                         parteDireita = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
                         return parteDireita / parteEsquerda;
                 }
             }
-    
             /*
              * resolvidas todas as operações, podemos apenas tentar avaliar o resultado que
              * temos e retorná-lo.
              */
-            String valor = Vali.codigoFonte.substring(inicio, fim + 1).trim();
+            String valor = Parser.getCodigoFonte().substring(inicio, fim + 1).trim();
     
             // primeiro verificamos se o resultado é um literal (número) e retorná-lo se for
             // o caso.
-            comparador = Pattern.compile("\\s*\\d\\s*").matcher(Vali.codigoFonte);
-        if(comparador.find(Parser.indiceAbsoluto) && comparador.start() == Parser.indiceAbsoluto) {
+            comparador = Pattern.compile("\\s*\\d\\s*").matcher(Parser.getCodigoFonte());
+
+        if(comparador.find(Parser.getIndiceAbsoluto()) && comparador.start() == Parser.getIndiceAbsoluto()) {
                 double resultado = Double.parseDouble(valor.toString().trim());
-                Parser.indiceAbsoluto += comparador.group().length();
+                Parser.sumIndiceAbsoluto(comparador.group().length());
                 return resultado;
             }
     
@@ -152,21 +152,21 @@ public class AvaliacaoDeExpessoes {
              * variável do tipo flutuante. por hora apenas tratamos variáveis e não funções.
              */
     
-            comparador = Pattern.compile("\\s*\\w\\s*").matcher(Vali.codigoFonte); // mesmas regras de nomeação do Java.
-            comparador.find(Parser.indiceAbsoluto);
+            comparador = Pattern.compile("\\s*\\w\\s*").matcher(Parser.getCodigoFonte()); // mesmas regras de nomeação do Java.
+            comparador.find(Parser.getIndiceAbsoluto());
             valor = comparador.group().trim();
             Variavel var = Variavel.getVariavel(valor);
     
             // a variável não existe.
             if (var == null)
-            throw new VariavelInexistente(Vali.codigoFonte, Parser.indiceAbsoluto);
+            throw new VariavelInexistente(Parser.getCodigoFonte(), Parser.getIndiceAbsoluto());
     
             // a variável existe, mas não é um inteiro.
             if (var.tipo != Tipos.FLUTUANTE && var.tipo != Tipos.INTEIRO)
-                throw new AtribuicaoTipoIncompativel(Vali.codigoFonte, Parser.indiceAbsoluto);
+                throw new AtribuicaoTipoIncompativel(Parser.getCodigoFonte(), Parser.getIndiceAbsoluto());
                 
             // assumimos então que a variável existe e possui valor inteiro.
-            Parser.indiceAbsoluto += comparador.group().length();
+            Parser.sumIndiceAbsoluto(comparador.group().length();
     
             return Double.parseDouble(var.valor.toString());
     
