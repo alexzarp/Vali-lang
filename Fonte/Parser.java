@@ -14,28 +14,55 @@ import java.util.regex.Matcher;
     para isso utilizaremos de alguns metacaracteres:
     - "\\w" se traduz para qualquer sequência de letras seguidos de números ou _.
         exs: "a", "ab2", "exemplo_23"
-    - "\\s" significa qualquer white space, como "\n", "\t", " "
-    - "+" significa que o valor anterior deve aparecer uma ou mais vezes.
+        - "\\s" significa qualquer white space, como "\n", "\t", " "
+        - "+" significa que o valor anterior deve aparecer uma ou mais vezes.
         ex: para "a+b", "aaab" é válido mas "ab" não
-    - "*" significa que o valor anterior deve aparecer zero ou mais vezes.
+        - "*" significa que o valor anterior deve aparecer zero ou mais vezes.
         ex: para "\\s*\\w\\s*", "  abc " é valido e "abc" também 
-    - "a{n,m}" significa "a" de n à m ocorrências seguidas */
-
+        - "a{n,m}" significa "a" de n à m ocorrências seguidas */
+        
 public class Parser {
     // instancia das classes externas
-    Escopo escopo = new Escopo();
+    /*Escopo escopo = new Escopo();
     AtribuicaoVariavel atribuicao = new AtribuicaoVariavel();
     Tools tools = new Tools();
-    Condicoes condicoes = new Condicoes();
+    Condicoes condicoes = new Condicoes();*/
+            
+
 
     // codigoFonte guarda todo o código fonte em uma única string.
-    public static String codigoFonte;
+    private static String codigoFonte;
+    public static String getCodigoFonte () {
+        return codigoFonte;
+    }// ← isso aqui não era um problema
+    // caso precisemos tratar de alguma forma o código fonte. possivelmente
+    // descartável!
+    public static void setCodigoFonte(String codigoFontee) {
+        codigoFonte = codigoFontee;
+    }
 
+
+
+    
     // contadores de caracteres. utilizaremos estes valores para formatar
     // a mensagem de erro em caso de erro, como se fossem cursores.
-    public static int indiceAbsoluto; // número total de caracteres lidos, incluindo \n.
-    public static int comprimentoDoPrograma;
-    // ↑ precisa se tornar private com get e set
+    private static int indiceAbsoluto; // número total de caracteres lidos, incluindo \n.
+    public static int getIndiceAbsoluto () {
+        return indiceAbsoluto;
+    }
+    public static void setIndiceAbsoluto (int indiceAbsolutoo) {
+        indiceAbsoluto = indiceAbsolutoo;
+    }
+    //---------------------------------------------------------------------------------------
+    private static int comprimentoDoPrograma;
+    public static int getComprimentoDoPrograma () {
+        return comprimentoDoPrograma;
+    }
+    public static void setComprimentoDoPrograma (int comprimentoDoProgramaa) {
+        comprimentoDoPrograma = comprimentoDoProgramaa;
+    }
+   
+
 
     public Parser(String codigoFonte) {
         setCodigoFonte(codigoFonte);
@@ -52,9 +79,4 @@ public class Parser {
     private void verificaAtribuicaoFuncao() throws Erro {
     }
 
-    // caso precisemos tratar de alguma forma o código fonte. possivelmente
-    // descartável!
-    public void setCodigoFonte(String codigoFonte) {
-        this.codigoFonte = codigoFonte;
-    }
 }
