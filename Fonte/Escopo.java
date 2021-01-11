@@ -1,4 +1,5 @@
 public class Escopo {
+    AtribuicaoVariavel atribuicao = new AtribuicaoVariavel();
     // resolve qualquer atribuição, com expressão algébrica e terminada em ;
     public void resolveCorpo() throws Erro {
 
@@ -32,7 +33,7 @@ public class Escopo {
             } else {
 
                 // como não é nenhuma função, resta apenas testar se há uma atribuição.
-                if(!verificaAtribuicaoVariavel()) {
+                if(!atribuicao.verificaAtribuicaoVariavel()) {
                     // como a linha não se adequa a nenhum dos contextos possíveis, apenas dizemos que o token é inesperado.
                     throw new TokenInesperado(codigoFonte, indiceAbsoluto);
                 }
