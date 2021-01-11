@@ -25,14 +25,15 @@ public class Parser {
     // instancia das classes externas
     Escopo escopo = new Escopo();
     AtribuicaoVariavel atribuicao = new AtribuicaoVariavel();
+    IgnoraEspaco ignoraEspaco = new IgnoraEspaco;
 
     // codigoFonte guarda todo o código fonte em uma única string.
     public String codigoFonte;
 
     // contadores de caracteres. utilizaremos estes valores para formatar
     // a mensagem de erro em caso de erro, como se fossem cursores.
-    private int indiceAbsoluto; // número total de caracteres lidos, incluindo \n.
-    private int comprimentoDoPrograma;
+    static public int indiceAbsoluto; // número total de caracteres lidos, incluindo \n.
+    static public int comprimentoDoPrograma;
 
     public Parser(String codigoFonte) {
         setCodigoFonte(codigoFonte);
@@ -106,7 +107,7 @@ public class Parser {
 
         Matcher comparador;
 
-        ignoraWhiteSpace();
+        ignoraEspaco.ignoraWhiteSpace();
 
         // procuramos por uma soma ou subtração.
         comparador = Pattern.compile("[\\+-]").matcher(codigoFonte);
@@ -188,7 +189,7 @@ public class Parser {
 	
 	Matcher comparador;
 
-        ignoraWhiteSpace();
+        ignoraEspaco.ignoraWhiteSpace();
 
         // procuramos por uma soma ou subtração.
         comparador = Pattern.compile("[\\+-]").matcher(codigoFonte);
@@ -264,15 +265,6 @@ public class Parser {
 
         return Double.parseDouble(var.valor.toString());
 
-    }
-
-    // pula todos os espaços em branco.
-    private void ignoraWhiteSpace() {
-        char c = codigoFonte.charAt(indiceAbsoluto);
-       while (indiceAbsoluto < comprimentoDoPrograma && (c == ' ' || c == '\n' || c == '\t')) {
-            indiceAbsoluto++;
-            c = codigoFonte.charAt(indiceAbsoluto);
-        }
     }
 
     // caso precisemos tratar de alguma forma o código fonte. possivelmente

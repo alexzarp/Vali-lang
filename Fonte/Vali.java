@@ -3,11 +3,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
 public class Vali {
+    public static String codigoFonte;
     public static void main(String[] args) {
         try {
             if(args[0].endsWith(".vali")) {
                 Scanner s = new Scanner(Paths.get(args[0]));
-                String codigoFonte = "";
+                //String codigoFonte = "";
 
                 while(s.hasNextLine()) {
                     codigoFonte += s.nextLine();
