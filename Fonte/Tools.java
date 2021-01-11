@@ -1,4 +1,4 @@
-public class IgnoraEspaco {
+public class Tools {
     // pula todos os espaços em branco.
     public void ignoraWhiteSpace() {
         char c = Vali.codigoFonte.charAt(Parser.indiceAbsoluto);

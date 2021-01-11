@@ -25,7 +25,7 @@ public class Parser {
     // instancia das classes externas
     Escopo escopo = new Escopo();
     AtribuicaoVariavel atribuicao = new AtribuicaoVariavel();
-    IgnoraEspaco ignoraEspaco = new IgnoraEspaco;
+    Tools tools = new Tools();
 
     // codigoFonte guarda todo o código fonte em uma única string.
     public String codigoFonte;
@@ -107,7 +107,7 @@ public class Parser {
 
         Matcher comparador;
 
-        ignoraEspaco.ignoraWhiteSpace();
+        tools.ignoraWhiteSpace();
 
         // procuramos por uma soma ou subtração.
         comparador = Pattern.compile("[\\+-]").matcher(codigoFonte);
@@ -189,7 +189,7 @@ public class Parser {
 	
 	Matcher comparador;
 
-        ignoraEspaco.ignoraWhiteSpace();
+        tools.ignoraWhiteSpace();
 
         // procuramos por uma soma ou subtração.
         comparador = Pattern.compile("[\\+-]").matcher(codigoFonte);
