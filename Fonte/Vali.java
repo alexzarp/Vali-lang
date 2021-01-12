@@ -32,7 +32,7 @@ public class Vali {
         } 
         catch(Exception e) {
             System.out.println(e.toString());
-            // e.printStackTrace();
+            e.printStackTrace();
         }
     }
 }

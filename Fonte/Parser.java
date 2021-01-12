@@ -131,7 +131,7 @@ public class Parser {
                         Integer valorInteiro = Integer.valueOf(avaliaExpressaoDeInteiros(indiceAbsoluto, comparador.end() - 2));
                         Inteiro i = new Inteiro(nomeVariavel, valorInteiro);
                         Variavel.setVariavel(i, codigoFonte, indiceAbsoluto);
-                        
+                        ignoraWhiteSpace();
                         System.out.println("eissos " + comparador.end());
                         indiceAbsoluto++; // considerando ";"
                         return true;
@@ -215,7 +215,7 @@ public class Parser {
                     indiceAbsoluto += comparador.group().length();
                     return true;
                 } else {
-
+                    System.out.println("hauyhuasassd");
                     ignoraWhiteSpace();
                     comparador = Pattern.compile("\\s*=\\s*").matcher(codigoFonte);
                     if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
@@ -223,13 +223,13 @@ public class Parser {
                         
                         // criamos uma variável e a salvamos na lista de variáveis.
                         // System.out.println("inicio " + indiceAbsoluto + " fim " + proximoPntVrgNaoContidoEmString(indiceAbsoluto));
-                        String valorPalavra = String.valueOf(avaliaExpressaoDePalavras(indiceAbsoluto, proximoCharNaoContidoEmString(indiceAbsoluto - 1, '\"', false)));
+                        String valorPalavra = String.valueOf(avaliaExpressaoDePalavras(indiceAbsoluto, proximoCharNaoContidoEmString(indiceAbsoluto - 1, ';', false)));
                         Palavra i = new Palavra(nomeVariavel, valorPalavra);
                         Variavel.setVariavel(i, codigoFonte, indiceAbsoluto);
 
                         ignoraWhiteSpace();
                         
-                        indiceAbsoluto++; // considerando ";"
+                        indiceAbsoluto += 2; // considerando ";"
                         return true;
                     
                     }
@@ -370,7 +370,7 @@ public class Parser {
 
         // verifica se encontramos uma " e podemos considerar a próxima sequência como string.
         if(codigoFonte.charAt(indiceAbsoluto) == '\"') {
-            
+            System.out.println("pelo menos");
             String str = "";
             
             indiceAbsoluto++; // considerando o " inicial
@@ -393,9 +393,19 @@ public class Parser {
             return str;
         }
 
-        // se não encontramos uma string, então tentaremos tratar esta "folha"
-        // da expressão como uma expressão algébrica.
-        return String.valueOf(avaliaExpressaoDeFlutuantes(inicio, fim));
+        // se não encontramos nenhuma string literal, trataremos essa "folha" como uma variável.
+        Matcher comparador = Pattern.compile("\\s*\\w\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        comparador.find(indiceAbsoluto);
+        String valor = comparador.group();
+        Variavel var = Variavel.getVariavel(valor.trim());
+
+        // a variável não existe.
+        if (var == null)
+            throw new VariavelInexistente(codigoFonte, indiceAbsoluto);
+
+        // agora que sabemos que a variável existe, apenas retornamos seu valor em string.
+        return var.valor.toString();
+
     }
 
     // esta função recebe uma expressão aritmética simples e retorna o resultado
@@ -449,13 +459,13 @@ public class Parser {
          * resolvidas todas as operações, podemos apenas tentar avaliar o resultado que
          * temos e retorná-lo.
          */
-        String valor = codigoFonte.substring(inicio, fim).trim();
+        String valor = codigoFonte.substring(inicio, fim + 1).trim();
 
         // primeiro verificamos se o resultado é um literal (número) e retorná-lo se for
         // o caso.
         comparador = Pattern.compile("\\s*\\d+\\s*").matcher(codigoFonte);
         if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-            int resultado = Integer.parseInt(valor);
+            int resultado = Integer.parseInt(valor.toString().trim());
             
             System.out.println(comparador.group());
             indiceAbsoluto += comparador.group().length();
