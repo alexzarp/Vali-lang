@@ -3,6 +3,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
 public class Vali {
+
     public static void main(String[] args) {
         try {
             if(args[0].endsWith(".vali")) {
@@ -31,7 +32,7 @@ public class Vali {
         } 
         catch(Exception e) {
             System.out.println(e.toString());
-            e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 }
