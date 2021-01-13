@@ -411,6 +411,21 @@ public class Parser {
 
     }
 
+    // O nosso print(); que se chama imprime();
+    public void printaTexto(String codigoFonte, int indiceAbsoluto) throws Erro{
+        ignoraWhiteSpace();
+        Matcher comparador = Pattern.compile("imprime\\s*(").matcher(codigoFonte);
+        if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            indiceAbsoluto += comparador.group().length();
+            int indiceParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
+            System.out.println(avaliaExpressaoDePalavras(indiceAbsoluto, indiceParenteses - 1));
+
+            indiceAbsoluto = proximoCharNaoContidoEmString(indiceAbsoluto, ';', false);
+        }
+        
+        proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
+    }
+
     // esta função recebe uma expressão aritmética simples e retorna o resultado
     // dela, independente variações de espaçamentos.
     // ex: "21+2*3" retorna 27.
