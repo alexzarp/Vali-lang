@@ -37,9 +37,7 @@ public class Parser {
         // loops, condicionais e atribuições de variáveis). se a linha não se encaixar
         // em nenhum contexto,
         // jogamos um erro de token inesperado.
-        while (indiceAbsoluto < comprimentoDoPrograma - 1) { // -1 por causa do índice 0 e -1 por causa do \n extra que
-                                                             // adicionamos no Vali.java
-            System.out.println("tamo ae " + codigoFonte.substring(indiceAbsoluto, comprimentoDoPrograma));
+        while (indiceAbsoluto < comprimentoDoPrograma - 1) {
             ignoraWhiteSpace();
 
             // regex para algo no formato "palavra palavra(" ou "palavra("
@@ -48,8 +46,6 @@ public class Parser {
             // se entrar, é porque encontrou uma chamada ou definição de função (loops
             // inclusive)
             if (comparador.find(indiceAbsoluto) && comparador.start(indiceAbsoluto) == 0) {
-
-                System.out.println("how come we don even have functions yet");
                 // verificaSe();
                 // verificaEnquanto();
                 // verificaPara();
@@ -63,13 +59,11 @@ public class Parser {
             } else {
                 // como não é nenhuma função, resta apenas testar se há uma atribuição.
                 if (!verificaAtribuicaoVariavel()) {
-                    System.out.println(codigoFonte.substring(indiceAbsoluto, comprimentoDoPrograma - 1));
                     // como a linha não se adequa a nenhum dos contextos possíveis, apenas dizemos
                     // que o token é inesperado.
                     throw new TokenInesperado(codigoFonte, indiceAbsoluto);
                 }
 
-                System.out.println("omfg");
             }
         }
         System.out.println("execução com sucesso do programa.");
@@ -102,7 +96,6 @@ public class Parser {
 
             ignoraWhiteSpace();
 
-            System.out.println(codigoFonte.charAt(indiceAbsoluto));
             // usamos regex para formatar a saída.
             // usamos as mesmas regras para nomeção de variáveis que o Java.
             comparador = Pattern.compile("[a-zA-Z]+[_0-9]*").matcher(codigoFonte);
@@ -138,7 +131,6 @@ public class Parser {
                         Inteiro i = new Inteiro(nomeVariavel, valorInteiro);
                         Variavel.setVariavel(i, codigoFonte, indiceAbsoluto);
                         ignoraWhiteSpace();
-                        System.out.println("eissos " + comparador.end());
                         indiceAbsoluto++; // considerando ";"
                         return true;
                     }
@@ -222,25 +214,21 @@ public class Parser {
                     indiceAbsoluto += comparador.group().length();
                     return true;
                 } else {
-                    System.out.println("hauyhuasassd"); 
                     ignoraWhiteSpace();
                     comparador = Pattern.compile("\\s*=\\s*").matcher(codigoFonte);
                     if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                         indiceAbsoluto += comparador.group().length();
 
+                        int indiceDeSinal = proximoCharNaoContidoEmString(indiceAbsoluto, ';', false);
+
                         // criamos uma variável e a salvamos na lista de variáveis.
-                        // System.out.println("inicio " + indiceAbsoluto + " fim " +
-                        // proximoPntVrgNaoContidoEmString(indiceAbsoluto));
                         String valorPalavra = String.valueOf(avaliaExpressaoDePalavras(indiceAbsoluto,
-                                proximoCharNaoContidoEmString(indiceAbsoluto, ';', false) -1));
+                                indiceDeSinal - 1));
                                 
-                        System.out.println("valorPalavra  eh " + valorPalavra);
                         Palavra i = new Palavra(nomeVariavel, valorPalavra);
                         Variavel.setVariavel(i, codigoFonte, indiceAbsoluto);
 
-                        ignoraWhiteSpace();
-
-                        indiceAbsoluto += 2; // considerando ";"
+                        indiceAbsoluto = indiceDeSinal + 1; // considerando ";"
                         return true;
 
                     }
@@ -257,35 +245,30 @@ public class Parser {
             String nomeDaVariavel = codigoFonte.substring(indiceAbsoluto, comparador.end() - 2).trim();
             Variavel var = Variavel.getVariavel(nomeDaVariavel);
 
-            System.out.println("fala tu " + codigoFonte.charAt(indiceAbsoluto));
             // se não conseguimos encontrar a variável, ela ainda não foi declarada.
             if (var == null)
                 throw new VariavelInexistente(codigoFonte, indiceAbsoluto);
 
             indiceAbsoluto += comparador.group().length(); // considerando desde o nome da variável até o ;
-
-            int indicePntVrg = proximoCharNaoContidoEmString(indiceAbsoluto, '\"', false);
+            ignoraWhiteSpace();
+            int indicePntVrg = proximoCharNaoContidoEmString(indiceAbsoluto, ';', false);
 
             switch (var.tipo) {
                 case PALAVRA:
                     var.valor = String.valueOf(avaliaExpressaoDePalavras(indiceAbsoluto, indicePntVrg - 1));
-                    indiceAbsoluto++; // considerando ;
-                    ignoraWhiteSpace();
+                    indiceAbsoluto = indicePntVrg + 1;
                     return true;
                 case INTEIRO:
                     var.valor = Integer.valueOf(avaliaExpressaoDeInteiros(indiceAbsoluto, indicePntVrg - 1));
-                    indiceAbsoluto++; // considerando ;
-                    ignoraWhiteSpace();
+                    indiceAbsoluto = indicePntVrg + 1;
                     return true;
                 case FLUTUANTE:
                     var.valor = Double.valueOf(avaliaExpressaoDeFlutuantes(indiceAbsoluto, indicePntVrg - 1));
-                    indiceAbsoluto++; // considerando ;
-                    ignoraWhiteSpace();
+                    indiceAbsoluto = indicePntVrg + 1;
                     return true;
                 case BINARIO:
                     var.valor = Boolean.valueOf(analiseCondicional(indiceAbsoluto, indicePntVrg - 1));
-                    indiceAbsoluto++; // considerando ;
-                    ignoraWhiteSpace();
+                    indiceAbsoluto = indicePntVrg + 1;
                     return true;
             }
         }
@@ -378,11 +361,10 @@ public class Parser {
         int indiceSinalConcatenacao = proximoCharNaoContidoEmString(inicio, '+', true);
         if (indiceSinalConcatenacao != -1 && indiceSinalConcatenacao <= fim) {
             String parteEsquerda, parteDireita;
-            System.out.println("this is the shit:" + codigoFonte.substring(indiceSinalConcatenacao + 1, fim));
             parteEsquerda = avaliaExpressaoDePalavras(inicio, indiceSinalConcatenacao - 1);
-            indiceAbsoluto++;
+            indiceAbsoluto = indiceSinalConcatenacao + 1;
             parteDireita = avaliaExpressaoDePalavras(indiceSinalConcatenacao + 1, fim);
-            return parteDireita + parteEsquerda;
+            return parteEsquerda + parteDireita;
         }
 
         // verifica se encontramos uma " e podemos considerar a próxima sequência como
@@ -435,7 +417,6 @@ public class Parser {
     // início e fim precisam ser índices absolutos.
     // TODO implementar parenteses.
     public int avaliaExpressaoDeInteiros(int inicio, int fim) throws Erro {
-        System.out.println("analisando " + codigoFonte.substring(inicio, fim));
         Matcher comparador;
 
         ignoraWhiteSpace();
@@ -449,12 +430,12 @@ public class Parser {
                     parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
-                    return parteDireita + parteEsquerda;
+                    return parteEsquerda + parteDireita;
                 case "-":
                     parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
-                    return parteDireita - parteEsquerda;
+                    return parteEsquerda - parteDireita;
             }
         }
 
@@ -467,12 +448,12 @@ public class Parser {
                     parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
-                    return parteDireita * parteEsquerda;
+                    return parteEsquerda * parteDireita;
                 case "/":
                     parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
-                    return parteDireita / parteEsquerda;
+                    return parteEsquerda / parteDireita;
             }
         }
 
@@ -488,10 +469,8 @@ public class Parser {
         if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
             int resultado = Integer.parseInt(valor.toString().trim());
 
-            System.out.println(comparador.group());
             indiceAbsoluto += comparador.group().length();
 
-            System.out.println("indice pos " + indiceAbsoluto);
             return resultado;
         }
 
@@ -535,12 +514,12 @@ public class Parser {
                     parteEsquerda = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
-                    return parteDireita + parteEsquerda;
+                    return parteEsquerda + parteDireita;
                 case "-":
                     parteEsquerda = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
-                    return parteDireita - parteEsquerda;
+                    return parteEsquerda - parteDireita;
             }
         }
 
@@ -553,12 +532,12 @@ public class Parser {
                     parteEsquerda = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
-                    return parteDireita * parteEsquerda;
+                    return parteEsquerda * parteDireita;
                 case "/":
                     parteEsquerda = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
-                    return parteDireita / parteEsquerda;
+                    return parteEsquerda / parteDireita;
             }
         }
 
@@ -605,7 +584,6 @@ public class Parser {
     // pula todos os espaços em branco.
     private void ignoraWhiteSpace() {
         if (indiceAbsoluto > comprimentoDoPrograma) {
-            System.out.println("dude.");
             return;
         }
         char c = codigoFonte.charAt(indiceAbsoluto);
