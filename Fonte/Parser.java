@@ -9,7 +9,7 @@ public class Parser {
     // contadores de caracteres. utilizaremos estes valores para formatar
     // a mensagem de erro em caso de erro, como se fossem cursores.
     private int indiceAbsoluto; // número total de caracteres lidos, incluindo \n.
-
+    
     private int comprimentoDoPrograma;
 
     public Parser(String codigoFonte) {
@@ -41,7 +41,7 @@ public class Parser {
             ignoraWhiteSpace();
 
             // regex para algo no formato "palavra palavra(" ou "palavra("
-            comparador = Pattern.compile("(\\s*\\w\\s)?(\\w*\\s\\()").matcher(codigoFonte);
+            comparador = Pattern.compile("(\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s)?([a-zA-Z]+([a-zA-Z_0-9])*\\s\\()").matcher(codigoFonte);
 
             // se entrar, é porque encontrou uma chamada ou definição de função (loops
             // inclusive)
@@ -98,7 +98,7 @@ public class Parser {
 
             // usamos regex para formatar a saída.
             // usamos as mesmas regras para nomeção de variáveis que o Java.
-            comparador = Pattern.compile("[a-zA-Z]+[_0-9]*").matcher(codigoFonte);
+            comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*").matcher(codigoFonte);
 
             // se não encontrar nada, é porque o próximo token é inválido.
             if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
@@ -145,7 +145,7 @@ public class Parser {
 
             // usamos regex para formatar a saída.
             // usamos as mesmas regras para nomeção de variáveis que o Java.
-            comparador = Pattern.compile("[a-zA-Z]+[_0-9]*").matcher(codigoFonte);
+            comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*").matcher(codigoFonte);
 
             // se não encontrar nada, é porque o próximo token é inválido.
             if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
@@ -184,6 +184,7 @@ public class Parser {
                 }
             }
         }
+
         // agora procuramos por uma atribuição do tipo palavra.
         // primeiro, verificamos pela criação de uma palavra.
 
@@ -195,7 +196,7 @@ public class Parser {
 
             // usamos regex para formatar a saída.
             // usamos as mesmas regras para nomeção de variáveis que o Java.
-            comparador = Pattern.compile("[a-zA-Z]+[_0-9]*").matcher(codigoFonte);
+            comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*").matcher(codigoFonte);
 
             // se não encontrar nada, é porque o próximo token é inválido.
             if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
@@ -240,7 +241,97 @@ public class Parser {
          * como não encontramos nenhuma criação de variável, vamos verificar se há a
          * alteração de uma variável pré-existente.
          */
-        comparador = Pattern.compile("[a-zA-Z]+[_0-9]*\\s*=").matcher(codigoFonte);
+        comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*\\s*=").matcher(codigoFonte);
+        if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            String nomeDaVariavel = codigoFonte.substring(indiceAbsoluto, comparador.end() - 2).trim();
+            Variavel var = Variavel.getVariavel(nomeDaVariavel);
+
+            // se não conseguimos encontrar a variável, ela ainda não foi declarada.
+            if (var == null)
+                throw new VariavelInexistente(codigoFonte, indiceAbsoluto);
+
+            indiceAbsoluto += comparador.group().length(); // considerando desde o nome da variável até o ;
+            ignoraWhiteSpace();
+            int indicePntVrg = proximoCharNaoContidoEmString(indiceAbsoluto, ';', false);
+
+            switch (var.tipo) {
+                case PALAVRA:
+                    var.valor = String.valueOf(avaliaExpressaoDePalavras(indiceAbsoluto, indicePntVrg - 1));
+                    indiceAbsoluto = indicePntVrg + 1;
+                    return true;
+                case INTEIRO:
+                    var.valor = Integer.valueOf(avaliaExpressaoDeInteiros(indiceAbsoluto, indicePntVrg - 1));
+                    indiceAbsoluto = indicePntVrg + 1;
+                    return true;
+                case FLUTUANTE:
+                    var.valor = Double.valueOf(avaliaExpressaoDeFlutuantes(indiceAbsoluto, indicePntVrg - 1));
+                    indiceAbsoluto = indicePntVrg + 1;
+                    return true;
+                case BINARIO:
+                    var.valor = Boolean.valueOf(analiseCondicional(indiceAbsoluto, indicePntVrg - 1));
+                    indiceAbsoluto = indicePntVrg + 1;
+                    return true;
+            }
+        }
+
+
+        // agora procuramos por uma atribuição do tipo binario.
+        // primeiro, verificamos pela criação de um binario.
+
+        comparador = Pattern.compile("binario\\s+").matcher(codigoFonte);
+        if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            indiceAbsoluto += 8;
+
+            ignoraWhiteSpace();
+
+            // usamos regex para formatar a saída.
+            // usamos as mesmas regras para nomeção de variáveis que o Java.
+            comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*").matcher(codigoFonte);
+
+            // se não encontrar nada, é porque o próximo token é inválido.
+            if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+                // age como uma forma de "next()" do Scanner.
+                String nomeVariavel = comparador.group();
+                indiceAbsoluto += nomeVariavel.length();
+
+                comparador = Pattern.compile("\\s*;\\s*").matcher(codigoFonte);
+
+                // se entrar aqui, é porque a variável não está recebendo um valor (como em
+                // "palavra a;").
+                if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+
+                    Variavel.setVariavel(new Binario(nomeVariavel, null), codigoFonte, indiceAbsoluto);
+
+                    indiceAbsoluto += comparador.group().length();
+                    return true;
+                } else {
+                    ignoraWhiteSpace();
+                    comparador = Pattern.compile("\\s*=\\s*").matcher(codigoFonte);
+                    if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+                        indiceAbsoluto += comparador.group().length();
+
+                        int indiceDeSinal = proximoCharNaoContidoEmString(indiceAbsoluto, ';', false);
+
+                        // criamos uma variável e a salvamos na lista de variáveis.
+                        Boolean valorPalavra = Boolean.valueOf(analiseCondicional(indiceAbsoluto,
+                                indiceDeSinal - 1));
+                                
+                        Binario i = new Binario(nomeVariavel, valorPalavra);
+                        Variavel.setVariavel(i, codigoFonte, indiceAbsoluto);
+
+                        indiceAbsoluto = indiceDeSinal + 1; // considerando ";"
+                        return true;
+
+                    }
+                }
+            }
+        }
+
+        /*
+         * como não encontramos nenhuma criação de variável, vamos verificar se há a
+         * alteração de uma variável pré-existente.
+         */
+        comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*\\s*=").matcher(codigoFonte);
         if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
             String nomeDaVariavel = codigoFonte.substring(indiceAbsoluto, comparador.end() - 2).trim();
             Variavel var = Variavel.getVariavel(nomeDaVariavel);
@@ -286,8 +377,16 @@ public class Parser {
         int ultimoIndiceAspas = 0, ultimoIndicePntVrg = 0, offset = 0;
         while (!(numeroParDeAspas && ultimoIndicePntVrg > ultimoIndiceAspas)) {
             if (inicio + offset > comprimentoDoPrograma - 1) {
-                if (!caractereOpcional)
-                    throw new AusenciaAspas(codigoFonte, indiceAbsoluto);
+                if (!caractereOpcional) {
+                    switch(c) {
+                        case '\"':
+                            throw new AusenciaAspas(codigoFonte, indiceAbsoluto);
+                        case ';':
+                            throw new AusenciaPontoEVirgula(codigoFonte, indiceAbsoluto);
+                        case ')':
+                            throw new AusenciaParenteses(codigoFonte, indiceAbsoluto);
+                    }                    
+                }
                 else
                     return -1;
             }
@@ -305,54 +404,82 @@ public class Parser {
     // TODO tratar variáveis binario, operador "!" e as keywords "verdadeiro" e
     // "falso".
     public boolean analiseCondicional(int inicio, int fim) throws Erro {
+        ignoraWhiteSpace();
 
         Matcher comparador = Pattern.compile("\\|").matcher(codigoFonte);
-        if (comparador.find(inicio) && comparador.end() < fim) {
-            return analiseCondicional(inicio, comparador.start()) || analiseCondicional(comparador.end(), fim);
+        if (comparador.find(inicio) && comparador.end() <= fim) {
+            boolean ladoEsquerdo = analiseCondicional(inicio, comparador.start() - 1);
+            indiceAbsoluto++;
+            boolean ladoDireito = analiseCondicional(comparador.end(), fim);
+            return ladoEsquerdo || ladoDireito;
         }
 
         comparador = Pattern.compile("&").matcher(codigoFonte);
-        if (comparador.find(inicio) && comparador.end() < fim) {
-            return analiseCondicional(inicio, comparador.start()) && analiseCondicional(comparador.end(), fim);
+        if (comparador.find(inicio) && comparador.end() <= fim) {
+            boolean ladoEsquerdo = analiseCondicional(inicio, comparador.start() - 1);
+            indiceAbsoluto++;
+            boolean ladoDireito = analiseCondicional(comparador.end(), fim);
+            return ladoEsquerdo && ladoDireito;
         }
 
-        comparador = Pattern.compile(">|<|==|<=|>=|!=").matcher(codigoFonte);
-        if (comparador.find(inicio) && comparador.end() < fim) {
+        comparador = Pattern.compile("(<=)|(>=)|>|<|(==)|(!=)").matcher(codigoFonte);
+        if (comparador.find(inicio) && comparador.end() <= fim) {
             String operacao = comparador.group();
-
+            double ladoEsquerdo = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
+            indiceAbsoluto += operacao.length();
+            double ladoDireito = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
+            // como doubles são levemente inconsistentes, usamos o compare para garantir
+            // uma comparação mais provável de estar correta.
+            int resultadoComparacao = Double.compare(ladoEsquerdo, ladoDireito);
             switch (operacao) {
                 case "==":
-                    return avaliaExpressaoDeInteiros(inicio,
-                            comparador.start()) == avaliaExpressaoDeInteiros(comparador.end(), fim);
+                    return resultadoComparacao == 0;
                 case ">":
-                    return avaliaExpressaoDeInteiros(inicio,
-                            comparador.start()) > avaliaExpressaoDeInteiros(comparador.end(), fim);
+                    return resultadoComparacao > 0;
 
                 case "<":
-                    return avaliaExpressaoDeInteiros(inicio,
-                            comparador.start()) < avaliaExpressaoDeInteiros(comparador.end(), fim);
+                    return resultadoComparacao < 0;
 
                 case "<=":
-                    return avaliaExpressaoDeInteiros(inicio,
-                            comparador.start()) <= avaliaExpressaoDeInteiros(comparador.end(), fim);
+                    return resultadoComparacao <= 0;
 
                 case ">=":
-                    return avaliaExpressaoDeInteiros(inicio,
-                            comparador.start()) >= avaliaExpressaoDeInteiros(comparador.end(), fim);
+                    return resultadoComparacao >= 0;
 
                 case "!=":
-                    return avaliaExpressaoDeInteiros(inicio,
-                            comparador.start()) != avaliaExpressaoDeInteiros(comparador.end(), fim);
+                    return resultadoComparacao != 0;
+            }
+        } 
+
+        // primeiro verificamos se a "folha" é um literal.
+        comparador = Pattern.compile("(verdadeiro|falso)\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            indiceAbsoluto += comparador.group().length();	
+            switch(comparador.group().trim()) {
+                case "verdadeiro":
+                    return true;
+                case "falso":
+                    return false;
             }
         }
 
-        // como não foi encontrado nenhum valor esperado, apenas dizemos que o token é
-        // inválido.
-        throw new TokenInesperado(codigoFonte, indiceAbsoluto);
+        // verificamos se a "folha" é uma variável.
+        comparador = Pattern.compile("\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            String valor = comparador.group().trim();
+            Variavel var = Variavel.getVariavel(valor);
+            // a variável não existe.
+            if (var == null)
+                throw new VariavelInexistente(codigoFonte, indiceAbsoluto);
+
+            indiceAbsoluto += comparador.group().length();
+            // agora que sabemos que a variável existe, apenas retornamos seu valor em
+            // string.
+            return Boolean.parseBoolean(var.valor.toString());
+        } else
+            throw new TokenInesperado(codigoFonte, indiceAbsoluto);
     }
 
-    // strings em Vali (por hora) podem apenas serem concatenadas por literais ou
-    // variáveis flutuantes.
     public String avaliaExpressaoDePalavras(int inicio, int fim) throws Erro {
         ignoraWhiteSpace();
         // o único operador possível para este tipo. concatena strings.
@@ -396,7 +523,7 @@ public class Parser {
 
         // se não encontramos nenhuma string literal, trataremos essa "folha" como uma
         // variável.
-        Matcher comparador = Pattern.compile("\\s*\\w\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        Matcher comparador = Pattern.compile("\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
         comparador.find(indiceAbsoluto);
         String valor = comparador.group().trim();
         Variavel var = Variavel.getVariavel(valor);
@@ -479,7 +606,7 @@ public class Parser {
          * variável do tipo inteiro. por hora apenas tratamos variáveis e não funções.
          */
 
-        comparador = Pattern.compile("\\s*\\w\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        comparador = Pattern.compile("\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
         comparador.find(indiceAbsoluto);
         valor = comparador.group();
         Variavel var = Variavel.getVariavel(valor.trim());
@@ -562,7 +689,7 @@ public class Parser {
          * funções.
          */
 
-        comparador = Pattern.compile("\\s*\\w\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        comparador = Pattern.compile("\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
         comparador.find(indiceAbsoluto);
         valor = comparador.group().trim();
         Variavel var = Variavel.getVariavel(valor);
