@@ -1,3 +1,4 @@
+package Fonte;
 public final class Flutuante extends Variavel {
 
     public Flutuante(String nome, Object valor) throws Erro {

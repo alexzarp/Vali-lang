@@ -1,3 +1,4 @@
+package Fonte;
 public abstract class Primitivo {
 
     public Tipos tipo;

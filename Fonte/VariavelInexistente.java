@@ -1,3 +1,4 @@
+package Fonte;
 public class VariavelInexistente extends Erro {
 
     private static final long serialVersionUID = 1L;

@@ -1,3 +1,4 @@
+package Fonte;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -166,7 +167,7 @@ public class AvaliacaoDeExpessoes {
                 throw new AtribuicaoTipoIncompativel(Parser.getCodigoFonte(), Parser.getIndiceAbsoluto());
                 
             // assumimos então que a variável existe e possui valor inteiro.
-            Parser.sumIndiceAbsoluto(comparador.group().length();
+            Parser.sumIndiceAbsoluto(comparador.group().length());
     
             return Double.parseDouble(var.valor.toString());
     

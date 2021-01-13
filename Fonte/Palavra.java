@@ -1,3 +1,4 @@
+package Fonte;
 public final class Palavra extends Variavel {
 
     public Palavra(String nome, Object valor) throws Erro {

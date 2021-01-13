@@ -1,3 +1,4 @@
+package Fonte;
 public class Tools {
     // pula todos os espaços em branco.
     public void ignoraWhiteSpace() {

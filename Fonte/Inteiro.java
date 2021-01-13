@@ -1,3 +1,4 @@
+package Fonte;
 public final class Inteiro extends Variavel {
 
     public Inteiro(String nome, Integer valor) throws Erro {
