@@ -66,11 +66,24 @@ public class Parser {
                 }
             }
         }
-        System.out.println("escopo resolvido com sucesso.");
     }
 
     // TODO implementar isso.
     private void verificaAtribuicaoFuncao() throws Erro {
+    }
+
+    private boolean verificaComentario() {
+        char c = codigoFonte.charAt(indiceAbsoluto);
+
+        if (c == '/' || c == '\\') {
+            while (c != '\n' && indiceAbsoluto < comprimentoDoPrograma - 1) {
+                indiceAbsoluto++;
+                c = codigoFonte.charAt(indiceAbsoluto);
+            }
+            indiceAbsoluto++;
+            return true;
+        } else
+            return false;
     }
 
     private boolean verificaSe() throws Erro {
@@ -85,19 +98,28 @@ public class Parser {
                 indiceAbsoluto = comparador.end();
                 int indiceFechaChaves = indiceChavePar();
 
-                System.out.println("antes " + indiceFechaChaves);
-            if(condicional) {
-                System.out.println("novo escopo");
-                Variavel.novoEscopo();
-                resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
-                Variavel.imprimeVariaveis();
-                Variavel.removeEscopo();
-            }
+                if(condicional) {
+                    Variavel.novoEscopo();
+                    resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
+                    Variavel.removeEscopo();
+                }
 
-            indiceAbsoluto = indiceFechaChaves + 1;
-            
-            System.out.println("dps " + indiceFechaChaves);
-            return true;
+                indiceAbsoluto = indiceFechaChaves + 1;
+
+                // verificamos se há a existência de um bloco else.
+                comparador = Pattern.compile("\\s*senao\\s*\\{\\s*").matcher(codigoFonte);
+                if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+                    indiceAbsoluto = comparador.end();
+                    indiceFechaChaves = indiceChavePar();
+                    if(!condicional) {
+                        Variavel.novoEscopo();
+                        resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
+                        Variavel.removeEscopo();
+                    }
+                    indiceAbsoluto = indiceFechaChaves + 1;
+                }
+                
+                return true;
 
             } else 
                 throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
@@ -125,6 +147,7 @@ public class Parser {
             throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
         return indiceAbsoluto + offset;
     }
+
 
     // verifica e resolve atribuições de variáveis, tanto criações quanto alterações.
     // retorna true caso encontre uma atribuição e false caso contrário.
@@ -238,20 +261,6 @@ public class Parser {
             }
         }
         return false;
-    }
-
-    private boolean verificaComentario() {
-        char c = codigoFonte.charAt(indiceAbsoluto);
-
-        if (c == '/' || c == '\\') {
-            while (c != '\n' && indiceAbsoluto < comprimentoDoPrograma - 1) {
-                indiceAbsoluto++;
-                c = codigoFonte.charAt(indiceAbsoluto);
-            }
-            indiceAbsoluto++;
-            return true;
-        } else
-            return false;
     }
  
     private boolean verificaCriacaoPalavra() throws Erro {
