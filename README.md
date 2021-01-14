@@ -49,4 +49,4 @@ Sinal | Ação
 \>= | Compara se o primeiro valor é maior ou igual ao segundo
 != | Compara se os valores são diferentes
 & | Compara se o primeiro e segundo valores são vardadeiros
-__|__ | Compara se o primeiro ou o segundo valores são verdadeiros|
+![Imagem Logo](/Utilidades/1d1029252d53798234f6ba9a6f3a99a9-removebg-preview.png) | Compara se o primeiro ou o segundo valores são verdadeiros|
