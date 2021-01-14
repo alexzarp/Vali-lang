@@ -36,7 +36,7 @@ public abstract class Erro extends Exception {
                     break;
             }
             indiceAtual++;
-            
+
         }
     }
 
@@ -57,14 +57,14 @@ public abstract class Erro extends Exception {
         // printa o offset do cursor.
         for(int i = 0; i < (indiceAbsoluto - indiceInicioLinha); i++)
             System.out.print(" ");
-        
+
         // printa o cursor.
         System.out.println("^");
     }
 
     public String toString() {
-        return "Erro: [" + getNome() + "] no caractere \"" + codigoFonte.charAt(indiceAbsoluto) + "\" da linha " + linha + ", coluna " + coluna + " (" + (indiceAbsoluto + 1) + "o caractere do codigo fonte, \\n inclusos e contando a partir do 1).";
+        return "Erro: [" + getNome() + "] no caractere \"" + codigoFonte.charAt(indiceAbsoluto) + "\" da linha " + (linha + 1) + ", coluna " + coluna + " (" + (indiceAbsoluto + 1) + "o caractere do codigo fonte, \\n inclusos e contando a partir do 1).";
     }
-    
+
     protected abstract String getNome();
 }

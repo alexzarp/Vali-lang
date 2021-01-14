@@ -1,7 +1,7 @@
 public final class Binario extends Variavel {
 
     public Binario(String nome, Object valor) throws Erro {
-        super(nome, Tipos.FLUTUANTE, valor);
+        super(nome, Tipos.BINARIO, valor);
     }
 
     // troca o valor se ele for do mesmo tipo que o da variável. se não, joga um
