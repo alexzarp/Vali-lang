@@ -9,7 +9,7 @@ java -jar Vali.jar nomedoarquivo.vali
 
 
 ## **Sintaxe**
-### A sintaxe funciona de forma que:
+#### A sintaxe funciona de forma que:
 Elemento | Exemplo
 ------|--------
 se, equivalente a if | se(a < b) {faça;}
@@ -17,10 +17,10 @@ enquanto, equivalente a while | enquanto(a > b) {faça;}
 imprime, equivalente a print | imprime("Olá mundo" + a); → "+" concatena elementos de qualquer tipo
 TIPO variavel = valor ou vazio; | INTEIRO num = 1;
 
-### A linguagem não é Case Sensitive, você pode colocar espaços como quiser.
+#### A linguagem não é Case Sensitive, você pode colocar espaços como quiser.
 
 ## **Documentação da linguagem Vali**
-### Declaração de variáveis: 
+#### Declaração de variáveis: 
 Tipos | Exemplo
 ------|--------
 INTEIRO | 0
