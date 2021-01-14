@@ -26,7 +26,6 @@ public class Parser {
     // resolve qualquer atribuição, com expressão algébrica e terminada em ;
     public void resolveCorpo(int inicio, int fim) throws Erro {
 
-        System.out.println("novo escopo!");
         // utilizamos expressões regulares para várias verificações ao longo da função.
         Matcher comparador;
         ignoraWhiteSpace();
@@ -38,26 +37,22 @@ public class Parser {
         // loops, condicionais e atribuições de variáveis). se a linha não se encaixar
         // em nenhum contexto,
         // jogamos um erro de token inesperado.
-        while (indiceAbsoluto <= fim) {
+        while (indiceAbsoluto < fim) {
             ignoraWhiteSpace();
 
-            System.out.println("nessa iter " + codigoFonte.charAt(indiceAbsoluto));
             // regex para algo no formato "palavra palavra(" ou "palavra("
             comparador = Pattern.compile("(\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s)?([a-zA-Z]+([a-zA-Z_0-9])*\\s*\\()").matcher(codigoFonte);
-            // se entrar, é porque encontrou uma chamada ou definição de função (loops
-            // inclusive)
-            if (comparador.find(indiceAbsoluto) && comparador.start() == 0) {System.out.println("capturou o se");
+            // se entrar, é porque encontrou uma chamada ou definição de função (laços
+            // e condicionais inclusive)
+            if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                 if(!(
-                     printaTexto(codigoFonte, indiceAbsoluto) ||
+                     verificaImprimeTexto()        ||
                      verificaSe()               
                     //  verificaEnquanto()         ||
                     //  verificaPara()             ||
                     //  verificaAtribuicaoFuncao()
                   ))
                     throw new TokenInesperado(codigoFonte, indiceAbsoluto);
-
-                // ps: lembrar de usar novoEscopo() e removeEscopo() toda vez que chamar uma
-                // função, seja um loop, if, ou função declarada no código.
 
             } else {
                 // como não é nenhuma função, resta apenas testar se há uma atribuição.
@@ -88,9 +83,9 @@ public class Parser {
             if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                 indiceAbsoluto = comparador.end();
                 int indiceFechaChaves = indiceChavePar(indiceAbsoluto);
-            System.out.println("home " + codigoFonte.charAt(indiceFechaChaves));
 
             if(condicional) {
+                System.out.println("novo escopo");
                 Variavel.novoEscopo();
                 resolveCorpo(indiceAbsoluto, indiceFechaChaves - 1);
                 Variavel.imprimeVariaveis();
@@ -507,25 +502,26 @@ public class Parser {
 
         // verifica se encontramos aspas duplas e podemos considerar a
         // próxima sequência como string.
-        if (codigoFonte.charAt(indiceAbsoluto) == '\"') {
+        if (codigoFonte.charAt(inicio) == '\"') {
+            
             String str = "";
-            indiceAbsoluto++; // considerando o " inicial
-            while (indiceAbsoluto < comprimentoDoPrograma - 1 &&
-                   codigoFonte.charAt(indiceAbsoluto) != '\"') {
-                str += codigoFonte.charAt(indiceAbsoluto);
-                indiceAbsoluto++;
+            inicio++; // considerando o " inicial
+            while (inicio < comprimentoDoPrograma - 1 &&
+                   codigoFonte.charAt(inicio) != '\"') {
+                str += codigoFonte.charAt(inicio);
+                inicio++;
             }
 
             // verificamos se o loop foi quebrado pelos motivos errados (falta de aspas).
-            if (indiceAbsoluto > comprimentoDoPrograma - 1)
-                throw new AusenciaAspas(codigoFonte, indiceAbsoluto - 1);
+            if (inicio > comprimentoDoPrograma - 1)
+                throw new AusenciaAspas(codigoFonte, inicio - 1);
 
             ignoraWhiteSpace();
 
             // verificamos se ainda há caracteres não-esperados sobrando
             // nesta "folha" da expressão.
-            if (indiceAbsoluto > fim)
-                throw new TokenInesperado(codigoFonte, indiceAbsoluto);
+            if (inicio > fim)
+                throw new TokenInesperado(codigoFonte, inicio);
 
             // erros possíveis verificados, se chegamos aqui é porque a string é
             // completamente aceitável.
@@ -558,17 +554,20 @@ public class Parser {
     }
 
     // O nosso print(); que se chama imprime();
-    public boolean printaTexto(String codigoFonte, int indiceAbsoluto) throws Erro{
+    public boolean verificaImprimeTexto() throws Erro {
         boolean retorno;
         ignoraWhiteSpace();
-        Matcher comparador = Pattern.compile("imprime\\s*(").matcher(codigoFonte);
+        Matcher comparador = Pattern.compile("imprime\\s*\\(").matcher(codigoFonte);
         if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+
             retorno = true;
             indiceAbsoluto += comparador.group().length();
             int indiceParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
-            System.out.println(avaliaExpressaoDePalavras(indiceAbsoluto, indiceParenteses - 1));
+            String s = avaliaExpressaoDePalavras(indiceAbsoluto, indiceParenteses - 1);
+            System.out.println(s);
+            
             ignoraWhiteSpace();
-            indiceAbsoluto = proximoCharNaoContidoEmString(indiceAbsoluto, ';', false);
+            indiceAbsoluto = proximoCharNaoContidoEmString(indiceParenteses, ';', false) + 1;
         } else {
             retorno = false;
         }
