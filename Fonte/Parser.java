@@ -48,7 +48,7 @@ public class Parser {
             // inclusive)
             if (comparador.find(indiceAbsoluto) && comparador.start() == 0) {System.out.println("capturou o se");
                 if(!(
-                    //  verificaImprime()          ||
+                     printaTexto(codigoFonte, indiceAbsoluto) ||
                      verificaSe()               
                     //  verificaEnquanto()         ||
                     //  verificaPara()             ||
@@ -555,6 +555,24 @@ public class Parser {
         }
         return var.valor.toString();
 
+    }
+
+    // O nosso print(); que se chama imprime();
+    public boolean printaTexto(String codigoFonte, int indiceAbsoluto) throws Erro{
+        boolean retorno;
+        ignoraWhiteSpace();
+        Matcher comparador = Pattern.compile("imprime\\s*(").matcher(codigoFonte);
+        if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            retorno = true;
+            indiceAbsoluto += comparador.group().length();
+            int indiceParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
+            System.out.println(avaliaExpressaoDePalavras(indiceAbsoluto, indiceParenteses - 1));
+            ignoraWhiteSpace();
+            indiceAbsoluto = proximoCharNaoContidoEmString(indiceAbsoluto, ';', false);
+        } else {
+            retorno = false;
+        }
+        return retorno;
     }
 
     // esta função recebe uma expressão aritmética simples e retorna o resultado
