@@ -39,31 +39,32 @@ public class Parser {
         // jogamos um erro de token inesperado.
         while (indiceAbsoluto < fim) {
             ignoraWhiteSpace();
+            if(verificaComentario());
+            else {
+                // regex para algo no formato "palavra palavra(" ou "palavra("
+                comparador = Pattern.compile("(\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s)?([a-zA-Z]+([a-zA-Z_0-9])*\\s*\\()").matcher(codigoFonte);
+                // se entrar, é porque encontrou uma chamada ou definição de função (laços
+                // e condicionais inclusive)
+                if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+                    if(!(
+                        verificaImprimeTexto()        ||
+                        verificaSe()               
+                        //  verificaEnquanto()         ||
+                        //  verificaPara()             ||
+                        //  verificaAtribuicaoFuncao()
+                    ))
+                        throw new TokenInesperado(codigoFonte, indiceAbsoluto);
 
-            // regex para algo no formato "palavra palavra(" ou "palavra("
-            comparador = Pattern.compile("(\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s)?([a-zA-Z]+([a-zA-Z_0-9])*\\s*\\()").matcher(codigoFonte);
-            // se entrar, é porque encontrou uma chamada ou definição de função (laços
-            // e condicionais inclusive)
-            if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-                if(!(
-                     verificaImprimeTexto()        ||
-                     verificaSe()               
-                    //  verificaEnquanto()         ||
-                    //  verificaPara()             ||
-                    //  verificaAtribuicaoFuncao()
-                  ))
-                    throw new TokenInesperado(codigoFonte, indiceAbsoluto);
+                } else {
+                    // como não é nenhuma função, resta apenas testar se há uma atribuição.
+                    if (!verificaAtribuicaoVariavel()) {
+                        // como a linha não se adequa a nenhum dos contextos possíveis, apenas dizemos
+                        // que o token é inesperado.
+                        throw new TokenInesperado(codigoFonte, indiceAbsoluto);
+                    }
 
-            } else {
-                // como não é nenhuma função, resta apenas testar se há uma atribuição.
-                if (!verificaAtribuicaoVariavel()) {
-                    // como a linha não se adequa a nenhum dos contextos possíveis, apenas dizemos
-                    // que o token é inesperado.
-                    throw new TokenInesperado(codigoFonte, indiceAbsoluto);
                 }
-
             }
-
         }
         System.out.println("escopo resolvido com sucesso.");
     }
@@ -82,17 +83,20 @@ public class Parser {
             comparador = Pattern.compile("\\s*\\{\\s*").matcher(codigoFonte);
             if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                 indiceAbsoluto = comparador.end();
-                int indiceFechaChaves = indiceChavePar(indiceAbsoluto);
+                int indiceFechaChaves = indiceChavePar();
 
+                System.out.println("antes " + indiceFechaChaves);
             if(condicional) {
                 System.out.println("novo escopo");
                 Variavel.novoEscopo();
-                resolveCorpo(indiceAbsoluto, indiceFechaChaves - 1);
+                resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
                 Variavel.imprimeVariaveis();
                 Variavel.removeEscopo();
             }
 
             indiceAbsoluto = indiceFechaChaves + 1;
+            
+            System.out.println("dps " + indiceFechaChaves);
             return true;
 
             } else 
@@ -103,7 +107,7 @@ public class Parser {
 
     // considera que o char anterior é um { e retorna o índice do } respectivo.
     // joga erros caso não encontre.
-    private int indiceChavePar(int indiceAbsoluto) throws Erro {
+    private int indiceChavePar() throws Erro {
         int paridadeChave = 1,
             offset = 0;
         boolean contidoEmAspas = false;
@@ -114,9 +118,9 @@ public class Parser {
                 paridadeChave--;
             else if(codigoFonte.charAt(indiceAbsoluto + offset) == '\"')
                 contidoEmAspas = !contidoEmAspas;
-            else
-                offset++;
+            offset++;
         }
+
         if(indiceAbsoluto + offset > comprimentoDoPrograma - 1)
             throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
         return indiceAbsoluto + offset;
@@ -236,15 +240,18 @@ public class Parser {
         return false;
     }
 
-    private void verificaComentario() {
+    private boolean verificaComentario() {
         char c = codigoFonte.charAt(indiceAbsoluto);
 
         if (c == '/' || c == '\\') {
-            while (c != '\n') {
+            while (c != '\n' && indiceAbsoluto < comprimentoDoPrograma - 1) {
                 indiceAbsoluto++;
+                c = codigoFonte.charAt(indiceAbsoluto);
             }
-        }
-        //return false;
+            indiceAbsoluto++;
+            return true;
+        } else
+            return false;
     }
  
     private boolean verificaCriacaoPalavra() throws Erro {
