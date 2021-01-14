@@ -7,6 +7,7 @@
 ```
 java -jar Vali.jar nomedoarquivo.vali
 ```
+#### **Necessita ter instalado Java JDK na máquina**
 
 
 ## **A sintaxe funciona de forma que:**
@@ -49,4 +50,6 @@ Sinal | Ação
 \>= | Compara se o primeiro valor é maior ou igual ao segundo
 != | Compara se os valores são diferentes
 & | Compara se o primeiro e segundo valores são vardadeiros
-![Barra](/Utilidades/barra.png) | Compara se o primeiro ou o segundo valores são verdadeiros
+ǀ | Compara se o primeiro ou o segundo valores são verdadeiros
+
+
