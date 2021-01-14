@@ -33,20 +33,20 @@ TEXTO | "abc"
 ## **Sinais aritiméticos:**
 Operador | Operação
 ---------|----------
-+ | Adição ou concatenação em caso do tipo TEXTO
-- | Subtração
+\\+ | Adição ou concatenação em caso do tipo TEXTO
+\\- | Subtração
 / | Divisão
-* | Multiplicação
+\\* | Multiplicação
 
 
 ## **Sinais condicionais:**
 Sinal | Ação
 -----|--------
 == | Compara se valores são iguais
-> | Compara se o primeiro valor é maior que o segundo
+\\> | Compara se o primeiro valor é maior que o segundo
 < | Compara se o primeiro valor é menor que o segundo
 <= | Compara se o primeiro valor é menor ou igual ao segundo
->= | Compara se o primeiro valor é maior ou igual ao segundo
+\\>= | Compara se o primeiro valor é maior ou igual ao segundo
 != | Compara se os valores são diferentes
 & | Compara se o primeiro e segundo valores são vardadeiros
 | | Compara se o primeiro ou o segundo valores são verdadeiros
