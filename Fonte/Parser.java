@@ -236,6 +236,17 @@ public class Parser {
         return false;
     }
 
+    private void verificaComentario() {
+        char c = codigoFonte.charAt(indiceAbsoluto);
+
+        if (c == '/' || c == '\\') {
+            while (c != '\n') {
+                indiceAbsoluto++;
+            }
+        }
+        //return false;
+    }
+ 
     private boolean verificaCriacaoPalavra() throws Erro {
         Matcher comparador = Pattern.compile("palavra\\s+").matcher(codigoFonte);
         if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
