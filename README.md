@@ -22,7 +22,7 @@ TIPO variavel = valor ou vazio; | INTEIRO num = 1;
 #### A linguagem não é Case Sensitive, você pode colocar espaços como quiser.
 
 
-## **Declaração de variáveis:**
+## **Tipos de variável:**
 Tipos | Exemplo
 :------:|:--------:
 INTEIRO | 0
@@ -53,3 +53,13 @@ Sinal | Ação
 ǀ | Compara se o primeiro ou o segundo valores são verdadeiros
 
 
+## **Declaração de variável:**
+```
+TIPO variavel = valor;
+```
+|Declarações e valores iniciais|
+:--:
+INTEIRO varivel = 0;
+FLUTUANTE variavel2 = 0.0;
+BOLEANO variavel3 = falso;
+TEXTO variacel4 = "Olá mundo!";
