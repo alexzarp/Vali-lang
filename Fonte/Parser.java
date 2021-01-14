@@ -46,11 +46,14 @@ public class Parser {
             // se entrar, é porque encontrou uma chamada ou definição de função (loops
             // inclusive)
             if (comparador.find(indiceAbsoluto) && comparador.start(indiceAbsoluto) == 0) {
+                if(!printaTexto(codigoFonte, indiceAbsoluto))
+                    throw new TokenInesperado(codigoFonte, indiceAbsoluto);
+                
                 // verificaSe();
                 // verificaEnquanto();
                 // verificaPara();
                 // verificaImprime();
-
+                //printaTexto(codigoFonte, indiceAbsoluto);
                 // verificaAtribuicaoFuncao();
 
                 // ps: lembrar de usar novoEscopo() e removeEscopo() toda vez que chamar uma
@@ -539,18 +542,21 @@ public class Parser {
     }
 
     // O nosso print(); que se chama imprime();
-    public void printaTexto(String codigoFonte, int indiceAbsoluto) throws Erro{
+    public boolean printaTexto(String codigoFonte, int indiceAbsoluto) throws Erro{
+        boolean retorno;
         ignoraWhiteSpace();
         Matcher comparador = Pattern.compile("imprime\\s*(").matcher(codigoFonte);
         if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            retorno = true;
             indiceAbsoluto += comparador.group().length();
             int indiceParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
             System.out.println(avaliaExpressaoDePalavras(indiceAbsoluto, indiceParenteses - 1));
-
+            ignoraWhiteSpace();
             indiceAbsoluto = proximoCharNaoContidoEmString(indiceAbsoluto, ';', false);
+        } else {
+            retorno = false;
         }
-        
-        proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
+        return retorno;
     }
 
     // esta função recebe uma expressão aritmética simples e retorna o resultado
