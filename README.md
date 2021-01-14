@@ -11,7 +11,7 @@ java -jar Vali.jar nomedoarquivo.vali
 
 ## **A sintaxe funciona de forma que:**
 Elemento | Exemplo
-------|--------
+:------:|:--------:
 se, equivalente a if | se(a < b) {faça;}
 enquanto, equivalente a while | enquanto(a > b) {faça;}
 imprime, equivalente a print | imprime("Olá mundo" + a); → "+" concatena elementos de qualquer tipo
@@ -23,7 +23,7 @@ TIPO variavel = valor ou vazio; | INTEIRO num = 1;
 
 ## **Declaração de variáveis:**
 Tipos | Exemplo
-------|--------
+:------:|:--------:
 INTEIRO | 0
 FLUTUANTE | 0.0
 BOLEANO | verdadeiro ou falso
@@ -32,7 +32,7 @@ TEXTO | "abc"
 
 ## **Sinais aritiméticos:**
 Operador | Operação
----------|----------
+:---------:|:----------:
 \+ | Adição ou concatenação em caso do tipo TEXTO
 \- | Subtração
 / | Divisão
@@ -41,7 +41,7 @@ Operador | Operação
 
 ## **Sinais condicionais:**
 Sinal | Ação
------|--------
+:-----:|:--------:
 == | Compara se valores são iguais
 \> | Compara se o primeiro valor é maior que o segundo
 < | Compara se o primeiro valor é menor que o segundo
@@ -49,4 +49,4 @@ Sinal | Ação
 \>= | Compara se o primeiro valor é maior ou igual ao segundo
 != | Compara se os valores são diferentes
 & | Compara se o primeiro e segundo valores são vardadeiros
-![Imagem Logo](/Utilidades/1d1029252d53798234f6ba9a6f3a99a9-removebg-preview.png) | Compara se o primeiro ou o segundo valores são verdadeiros|
+<img src="Utilidades/Fundo transparente 1900x1900.png" width="15" /> | Compara se o primeiro ou o segundo valores são verdadeiros|
