@@ -19,12 +19,14 @@ enquanto, equivalente a while | enquanto(a > b) {faça;}
 imprime, equivalente a print | imprime("Olá mundo" + a); → "+" concatena elementos de qualquer tipo
 tipo variavel = valor ou vazio; | inteiro num = 1;
 
-Qualquer soma de tipos numérico, deve ser feita anterioemente ao uso de alguma condição ou função:
+Qualquer soma de tipos numérico deve ser feita antes de usar:
+```
+imprime();
+```
 
 |||
-:-|-:
+:-:|:-:
 a = a + b; | imprime(a);
-c = c + 1; | se(c < b) {faça;}
 
 A linguagem não é Case Sensitive, você pode colocar espaços como quiser.
 
@@ -58,7 +60,8 @@ Sinal | Ação
 != | Compara se os valores são diferentes
 & | Compara se o primeiro e segundo valores são vardadeiros
 ǀ | Compara se o primeiro ou o segundo valores são verdadeiros
-#### Não funciona com palavra e binario
+
+Não funciona com palavra e binario
 
 ## **Declaração de variável:**
 ```
