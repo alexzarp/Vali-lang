@@ -1,2 +1,6 @@
-inteiro a = 2; inteiro b = 2;
-imprime(a + b);
+inteiro a = 2; inteiro b = 3;
+a = a + b;
+imprime(a);
+se (a < b) {
+    imprime ("deu certo");
+}
