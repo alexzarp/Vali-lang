@@ -14,14 +14,4 @@ public final class Inteiro extends Variavel {
     public Tipos getTipo() {
         return Tipos.INTEIRO;
     }
-
-    public Palavra toPalavra() throws Exception {
-        // nome = null pois o retorno é um literal (isto é, não é atrelado a alguma variável)
-        return new Palavra(null, valor.toString());
-    }
-
-    public Flutuante toFlutuante() throws Exception {
-        return new Flutuante(null, Double.valueOf(valor.toString()));
-    }
-
 }

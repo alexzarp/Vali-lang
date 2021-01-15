@@ -67,8 +67,8 @@ public abstract class Variavel extends Primitivo {
     
     // removemos as variáveis que não serão mais acessadas por motivos de visibilidade.
     public static void removeEscopo() {
-        escopoAtual--;
         variaveis.remove(escopoAtual);
+        escopoAtual--;
     }
 
     // retorna true se a string for palavra reservada.

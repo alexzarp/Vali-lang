@@ -3,17 +3,16 @@ import java.util.regex.Matcher;
 
 public class Parser {
 
-    // codigoFonte guarda todo o código fonte em uma única string.
+    // codigoFonte guarda todo o código a ser interpretado em uma única string.
     public String codigoFonte;
 
-    // contadores de caracteres. utilizaremos estes valores para formatar
-    // a mensagem de erro em caso de erro, como se fossem cursores.
-    private int indiceAbsoluto; // número total de caracteres lidos, incluindo \n.
+    // o cursor do parser código fonte.
+    private int indiceAbsoluto;
     
     private int comprimentoDoPrograma;
 
     public Parser(String codigoFonte) {
-        setCodigoFonte(codigoFonte);
+        this.codigoFonte = codigoFonte;
         this.indiceAbsoluto = 0;
         this.comprimentoDoPrograma = codigoFonte.length();
     }
@@ -26,23 +25,14 @@ public class Parser {
     // resolve qualquer atribuição, com expressão algébrica e terminada em ;
     public void resolveCorpo(int inicio, int fim) throws Erro {
 
-        // utilizamos expressões regulares para várias verificações ao longo da função.
         Matcher comparador;
-        ignoraWhiteSpace();
 
-        // enquanto ainda há linhas do código fonte a serem avaliadas, verificamos se a
-        // próxima linha
-        // se encaixa em algum dos contextos esperados (chamadas de funções, atribuições
-        // de funções,
-        // loops, condicionais e atribuições de variáveis). se a linha não se encaixar
-        // em nenhum contexto,
-        // jogamos um erro de token inesperado.
         while (indiceAbsoluto < fim) {
             ignoraWhiteSpace();
             if(verificaComentario());
             else {
-                // regex para algo no formato "palavra palavra(" ou "palavra("
-                comparador = Pattern.compile("(\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s)?([a-zA-Z]+([a-zA-Z_0-9])*\\s*\\()").matcher(codigoFonte);
+                // expressão regular para algo no formato "palavra palavra123(" ou "palavra123("
+                comparador = Pattern.compile("(\\s*[a-zA-Z]+\\s)?([a-zA-Z]+\\w*\\s*\\()").matcher(codigoFonte);
                 // se entrar, é porque encontrou uma chamada ou definição de função (laços
                 // e condicionais inclusive)
                 if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
@@ -96,7 +86,7 @@ public class Parser {
             comparador = Pattern.compile("\\s*\\{\\s*").matcher(codigoFonte);
             if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                 indiceAbsoluto = comparador.end();
-                int indiceFechaChaves = indiceChavePar();
+                int indiceFechaChaves = indiceParDeChaves();
 
                 if(condicional) {
                     Variavel.novoEscopo();
@@ -110,7 +100,7 @@ public class Parser {
                 comparador = Pattern.compile("\\s*senao\\s*\\{\\s*").matcher(codigoFonte);
                 if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                     indiceAbsoluto = comparador.end();
-                    indiceFechaChaves = indiceChavePar();
+                    indiceFechaChaves = indiceParDeChaves();
                     if(!condicional) {
                         Variavel.novoEscopo();
                         resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
@@ -129,7 +119,7 @@ public class Parser {
 
     // considera que o char anterior é um { e retorna o índice do } respectivo.
     // joga erros caso não encontre.
-    private int indiceChavePar() throws Erro {
+    private int indiceParDeChaves() throws Erro {
         int paridadeChave = 1,
             offset = 0;
         boolean contidoEmAspas = false;
@@ -152,7 +142,6 @@ public class Parser {
     // verifica e resolve atribuições de variáveis, tanto criações quanto alterações.
     // retorna true caso encontre uma atribuição e false caso contrário.
     private boolean verificaAtribuicaoVariavel() throws Erro {
-        ignoraWhiteSpace();
         return verificaCriacaoInteiro()    ||
                verificaCriacaoFlutuante()  ||
                verificaCriacaoPalavra()    ||
@@ -170,7 +159,7 @@ public class Parser {
 
             // usamos regex para formatar a saída.
             // usamos as mesmas regras para nomeção de variáveis que o Java.
-            comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*").matcher(codigoFonte);
+            comparador = Pattern.compile("[a-zA-Z]+\\w*").matcher(codigoFonte);
 
             // se não encontrar nada, é porque o próximo token é inválido.
             if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
@@ -198,8 +187,7 @@ public class Parser {
                         indiceAbsoluto++; // considerando "="
 
                         // criamos uma variável e a salvamos na lista de variáveis.
-                        Integer valorInteiro = Integer
-                                .valueOf(avaliaExpressaoDeInteiros(indiceAbsoluto, comparador.end() - 2));
+                        Integer valorInteiro = Integer.valueOf(avaliaExpressaoDeInteiros(indiceAbsoluto, comparador.end() - 2));
                         Inteiro i = new Inteiro(nomeVariavel, valorInteiro);
                         Variavel.setVariavel(i, codigoFonte, indiceAbsoluto);
                         ignoraWhiteSpace();
@@ -221,11 +209,10 @@ public class Parser {
 
             // usamos regex para formatar a saída.
             // usamos as mesmas regras para nomeção de variáveis que o Java.
-            comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*").matcher(codigoFonte);
+            comparador = Pattern.compile("[a-zA-Z]+\\w*").matcher(codigoFonte);
 
             // se não encontrar nada, é porque o próximo token é inválido.
             if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-                // age como uma forma de "next()" do Scanner.
                 String nomeVariavel = comparador.group();
                 indiceAbsoluto += nomeVariavel.length();
 
@@ -272,11 +259,10 @@ public class Parser {
 
             // usamos regex para formatar a saída.
             // usamos as mesmas regras para nomeção de variáveis que o Java.
-            comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*").matcher(codigoFonte);
+            comparador = Pattern.compile("[a-zA-Z]+\\w*").matcher(codigoFonte);
 
             // se não encontrar nada, é porque o próximo token é inválido.
             if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-                // age como uma forma de "next()" do Scanner.
                 String nomeVariavel = comparador.group();
                 indiceAbsoluto += nomeVariavel.length();
 
@@ -324,7 +310,7 @@ public class Parser {
 
             // usamos regex para formatar a saída.
             // usamos as mesmas regras para nomeção de variáveis que o Java.
-            comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*").matcher(codigoFonte);
+            comparador = Pattern.compile("[a-zA-Z]+\\w*").matcher(codigoFonte);
 
             // se não encontrar nada, é porque o próximo token é inválido.
             if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
@@ -368,7 +354,7 @@ public class Parser {
     }
 
     private boolean verificaAlteracaoVariavel() throws Erro {
-        Matcher comparador = Pattern.compile("[a-zA-Z]+([a-zA-Z_0-9])*\\s*=").matcher(codigoFonte);
+        Matcher comparador = Pattern.compile("[a-zA-Z]+\\w*\\s*=").matcher(codigoFonte);
         if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
             String nomeDaVariavel = codigoFonte.substring(indiceAbsoluto, comparador.end() - 2).trim();
             Variavel var = Variavel.getVariavel(nomeDaVariavel);
@@ -436,8 +422,6 @@ public class Parser {
     }
 
     // analisa expressões booleanas.
-    // TODO tratar variáveis binario, operador "!" e as keywords "verdadeiro" e
-    // "falso".
     public boolean analiseCondicional(int inicio, int fim) throws Erro {
         ignoraWhiteSpace();
 
@@ -480,10 +464,17 @@ public class Parser {
                 case "!=":
                     return resultadoComparacao != 0;
             }
-        } 
+        }
+
+        // por último, verficamos se há uma tentativa de inverter o valor de uma folha.
+        comparador = Pattern.compile("!\\s*").matcher(codigoFonte);
+        if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            indiceAbsoluto += comparador.group().length();
+            return !analiseCondicional(comparador.end(), fim);
+        }
 
         // primeiro verificamos se a "folha" é um literal.
-        comparador = Pattern.compile("(verdadeiro|falso)\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        comparador = Pattern.compile("(verdadeiro|falso)\\s*").matcher(codigoFonte);
         if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
             indiceAbsoluto += comparador.group().length();	
             switch(comparador.group().trim()) {
@@ -495,7 +486,7 @@ public class Parser {
         }
 
         // verificamos se a "folha" é uma variável.
-        comparador = Pattern.compile("\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        comparador = Pattern.compile("\\s*[a-zA-Z]+\\w*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
         if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
             String valor = comparador.group().trim();
             Variavel var = Variavel.getVariavel(valor);
@@ -557,7 +548,7 @@ public class Parser {
 
         // se não encontramos nenhuma string literal, trataremos essa "folha" como uma
         // variável.
-        Matcher comparador = Pattern.compile("\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        Matcher comparador = Pattern.compile("\\s*[a-zA-Z]+\\w*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
         comparador.find(indiceAbsoluto);
         String valor = comparador.group().trim();
         Variavel var = Variavel.getVariavel(valor);
@@ -583,7 +574,6 @@ public class Parser {
     // O nosso print(); que se chama imprime();
     public boolean verificaImprimeTexto() throws Erro {
         boolean retorno;
-        ignoraWhiteSpace();
         Matcher comparador = Pattern.compile("imprime\\s*\\(").matcher(codigoFonte);
         if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
 
@@ -669,7 +659,7 @@ public class Parser {
          * variável do tipo inteiro. por hora apenas tratamos variáveis e não funções.
          */
 
-        comparador = Pattern.compile("\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        comparador = Pattern.compile("\\s*[a-zA-Z]+\\w*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
         comparador.find(indiceAbsoluto);
         valor = comparador.group();
         Variavel var = Variavel.getVariavel(valor.trim());
@@ -751,8 +741,7 @@ public class Parser {
          * uma variável do tipo flutuante. por hora apenas tratamos variáveis e não
          * funções.
          */
-
-        comparador = Pattern.compile("\\s*[a-zA-Z]+([a-zA-Z_0-9])*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
+        comparador = Pattern.compile("\\s*[a-zA-Z]+\\w*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
         comparador.find(indiceAbsoluto);
         valor = comparador.group().trim();
         Variavel var = Variavel.getVariavel(valor);
@@ -781,14 +770,5 @@ public class Parser {
             indiceAbsoluto++;
             c = codigoFonte.charAt(indiceAbsoluto);
         }
-    }
-
-    // caso precisemos tratar de alguma forma o código fonte. possivelmente
-    // descartável!
-    public void setCodigoFonte(String codigoFonte) {
-        if (this.codigoFonte == null)
-            this.codigoFonte = codigoFonte;
-        else
-            System.out.println("Tentativa dupla de setar um código fonte.");
     }
 }

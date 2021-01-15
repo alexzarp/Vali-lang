@@ -14,14 +14,4 @@ public final class Palavra extends Variavel {
     public Tipos getTipo() {
         return Tipos.PALAVRA;
     }
-
-    public Palavra toInt() throws Erro {
-        // nome = null pois o retorno é um literal (isto é, não é atrelado a alguma variável)
-        return new Palavra(null, Integer.valueOf(valor.toString()));
-    }
-
-    public Flutuante toFlutuante() throws Erro {
-        return new Flutuante(null, Double.valueOf(valor.toString()));
-    }
-
 }
