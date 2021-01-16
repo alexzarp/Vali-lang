@@ -134,7 +134,10 @@ public class Parser {
         }
 
         if(indiceAbsoluto + offset > comprimentoDoPrograma - 1)
-            throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
+            if(sinal == '{')
+                throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
+            else
+                throw new NumeroInadequadoParenteses(codigoFonte, indiceAbsoluto);
         return indiceAbsoluto + (offset);
     }
 
@@ -584,7 +587,7 @@ public class Parser {
 
             if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                 indiceAbsoluto = comparador.end();
-                int indiceFechaChaves = indiceParDeChaves();    
+                int indiceFechaChaves = indiceParDeSinal('{');    
             
                 while (condicional) {
                     indiceAbsoluto = comparador.end();
