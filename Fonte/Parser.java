@@ -135,7 +135,7 @@ public class Parser {
 
         if(indiceAbsoluto + offset > comprimentoDoPrograma - 1)
             throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
-        return indiceAbsoluto + (offset - 1);
+        return indiceAbsoluto + (offset);
     }
 
 
@@ -575,7 +575,7 @@ public class Parser {
         //ignoraWhiteSpace();
         Matcher comparador = Pattern.compile("enquanto\\s*\\(").matcher(codigoFonte);
         if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-            //int iniciodobloco = comparador.end();
+            int iniciodobloco = comparador.end();
             indiceAbsoluto = comparador.end(); // não consideramos o abre parênteses.
             int indiceFechaParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
             boolean condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
@@ -587,11 +587,12 @@ public class Parser {
                 int indiceFechaChaves = indiceParDeChaves();    
             
                 while (condicional) {
+                    indiceAbsoluto = comparador.end();
                     Variavel.novoEscopo();
                     resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
                     Variavel.removeEscopo();
+                    indiceAbsoluto = iniciodobloco;
                     condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
-                    indiceAbsoluto = comparador.end();
                 }
                 indiceAbsoluto = indiceFechaChaves + 1;     
                     
