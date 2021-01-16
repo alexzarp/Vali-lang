@@ -38,8 +38,8 @@ public class Parser {
                 if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                     if(!(
                         verificaImprimeTexto()        ||
-                        verificaSe()               
-                        //  verificaEnquanto()         ||
+                        verificaSe()                  ||
+                        verificaEnquanto()            
                         //  verificaPara()             ||
                         //  verificaAtribuicaoFuncao()
                     ))
@@ -135,7 +135,7 @@ public class Parser {
 
         if(indiceAbsoluto + offset > comprimentoDoPrograma - 1)
             throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
-        return indiceAbsoluto + offset;
+        return indiceAbsoluto + (offset);
     }
 
 
@@ -570,6 +570,44 @@ public class Parser {
         return var.valor.toString();
 
     }
+
+    public boolean verificaEnquanto() throws Erro{
+        //ignoraWhiteSpace();
+        Matcher comparador = Pattern.compile("enquanto\\s*\\(").matcher(codigoFonte);
+        if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            int iniciodobloco = comparador.end();
+            indiceAbsoluto = comparador.end(); // não consideramos o abre parênteses.
+            int indiceFechaParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
+            boolean condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
+            indiceAbsoluto++; // considerando )
+            comparador = Pattern.compile("\\s*\\{\\s*").matcher(codigoFonte);
+
+            if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+                indiceAbsoluto = comparador.end();
+                int indiceFechaChaves = indiceParDeChaves();    
+            
+                while (condicional) {
+                    indiceAbsoluto = comparador.end();
+                    Variavel.novoEscopo();
+                    resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
+                    Variavel.removeEscopo();
+                    indiceAbsoluto = iniciodobloco;
+                    condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
+                }
+                indiceAbsoluto = indiceFechaChaves + 1;     
+                    
+                return true;
+            }
+            else 
+                throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
+        
+        }
+        return false;
+    }
+    
+    
+
+    //public boolean verificaPara() throws Erro {}
 
     // O nosso print(); que se chama imprime();
     public boolean verificaImprimeTexto() throws Erro {
