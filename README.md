@@ -82,14 +82,9 @@ Operador | Operação
 \* | Multiplicação
  % | Resto
 
-<<<<<<< HEAD
 Utilize inteiro para divisões inteiras e flutuante para resultados racionais.
 <br>
 Atente-se de que, primeiro são feitas operações que contém sinal, por exemplo -a ou -1, após isso os * % / e logo após os + -.
-=======
-Utilize ``inteiro`` para salvar resultados de divisões inteiras e ``flutuante`` para resultados racionais.
->>>>>>> a2247e641582119f9b5a536bd69209b332ccfbfe
-
 
 ## **Sinais comparativos:**
 Sinal | Ação
