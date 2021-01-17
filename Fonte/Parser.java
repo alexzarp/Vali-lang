@@ -31,18 +31,17 @@ public class Parser {
             ignoraWhiteSpace();
             if(verificaComentario());
             else {
-                // expressão regular para algo no formato "palavra palavra123(" ou "palavra123("
-                comparador = Pattern.compile("(\\s*[a-zA-Z]+\\s)?([a-zA-Z]+\\w*\\s*\\()").matcher(codigoFonte);
+                // expressão regular para algo no formato "palavra("
+                comparador = Pattern.compile("[a-zA-Z]+\\s*\\(").matcher(codigoFonte);
                 // se entrar, é porque encontrou uma chamada ou definição de função (laços
                 // e condicionais inclusive)
                 if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                     if(!(
-                        verificaImprimeTexto()        ||
-                        verificaSe()                  ||
+                        verificaImprimeTexto() ||
+                        verificaSe()           ||
                         verificaEnquanto()            
-                        //  verificaPara()             ||
-                        //  verificaAtribuicaoFuncao()
-                    ))
+                        //  verificaPara()             
+                      ))
                         throw new TokenInesperado(codigoFonte, indiceAbsoluto);
 
                 } else {
@@ -55,10 +54,6 @@ public class Parser {
                 }
             }
         }
-    }
-
-    // TODO implementar isso.
-    private void verificaAtribuicaoFuncao() throws Erro {
     }
 
     private boolean verificaComentario() {
@@ -116,31 +111,59 @@ public class Parser {
         return false;
     }
 
-    // considera que o char anterior é um { e retorna o índice do } respectivo.
-    // joga erros caso não encontre.
-    private int indiceParDeSinal(char sinal) throws Erro {
-        char sinalContrario = sinal == '{'? '}': ')';
-        int paridadeChave = 1,
-            offset = 0;
-        boolean contidoEmAspas = false;
-        while(paridadeChave != 0 && indiceAbsoluto + offset < comprimentoDoPrograma - 1) {
-            if(codigoFonte.charAt(indiceAbsoluto + offset) == sinal && !contidoEmAspas)
-                paridadeChave++;
-            else if(codigoFonte.charAt(indiceAbsoluto + offset) == sinalContrario && !contidoEmAspas)
-                paridadeChave--;
-            else if(codigoFonte.charAt(indiceAbsoluto + offset) == '\"')
-                contidoEmAspas = !contidoEmAspas;
-            offset++;
-        }
+    public boolean verificaEnquanto() throws Erro{
+        //ignoraWhiteSpace();
+        Matcher comparador = Pattern.compile("enquanto\\s*\\(").matcher(codigoFonte);
+        if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            int iniciodobloco = comparador.end();
+            indiceAbsoluto = comparador.end(); // não consideramos o abre parênteses.
+            int indiceFechaParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
+            boolean condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
+            indiceAbsoluto++; // considerando )
+            comparador = Pattern.compile("\\s*\\{\\s*").matcher(codigoFonte);
 
-        if(indiceAbsoluto + offset > comprimentoDoPrograma - 1)
-            if(sinal == '{')
+            if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+                indiceAbsoluto = comparador.end();
+                int indiceFechaChaves = indiceParDeSinal('{');    
+            
+                while (condicional) {
+                    indiceAbsoluto = comparador.end();
+                    Variavel.novoEscopo();
+                    resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
+                    Variavel.removeEscopo();
+                    indiceAbsoluto = iniciodobloco;
+                    condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
+                }
+                indiceAbsoluto = indiceFechaChaves + 1;     
+                    
+                return true;
+            }
+            else 
                 throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
-            else
-                throw new NumeroInadequadoParenteses(codigoFonte, indiceAbsoluto);
-        return indiceAbsoluto + (offset);
+        
+        }
+        return false;
     }
 
+    // O nosso print(); que se chama imprime();
+    public boolean verificaImprimeTexto() throws Erro {
+        boolean retorno;
+        Matcher comparador = Pattern.compile("imprime\\s*\\(").matcher(codigoFonte);
+        if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+
+            retorno = true;
+            indiceAbsoluto += comparador.group().length();
+            int indiceParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
+            String s = avaliaExpressaoDePalavras(indiceAbsoluto, indiceParenteses - 1);
+            System.out.println(s);
+            
+            ignoraWhiteSpace();
+            indiceAbsoluto = proximoCharNaoContidoEmString(indiceParenteses, ';', false) + 1;
+        } else {
+            retorno = false;
+        }
+        return retorno;
+    }
 
     // verifica e resolve atribuições de variáveis, tanto criações quanto alterações.
     // retorna true caso encontre uma atribuição e false caso contrário.
@@ -392,38 +415,6 @@ public class Parser {
         return false;
     }
 
-    // retorna o índice do próximo ponto e vírgula garantido de não
-    // pertencer à uma string/palavra. então, por exemplo,
-    // ";" + ";";
-    // retornaria 7. retorna -1 caso não encontre e caractereOpcional seja true.
-    public int proximoCharNaoContidoEmString(int inicio, char c, boolean caractereOpcional) throws Erro {
-        boolean numeroParDeAspas = true;
-        int ultimoIndiceAspas = 0, ultimoIndicePntVrg = 0, offset = 0;
-        while (!(numeroParDeAspas && ultimoIndicePntVrg > ultimoIndiceAspas)) {
-            if (inicio + offset > comprimentoDoPrograma - 1) {
-                if (!caractereOpcional) {
-                    switch(c) {
-                        case '\"':
-                            throw new AusenciaAspas(codigoFonte, indiceAbsoluto);
-                        case ';':
-                            throw new AusenciaPontoEVirgula(codigoFonte, indiceAbsoluto);
-                        case ')':
-                            throw new AusenciaParenteses(codigoFonte, indiceAbsoluto);
-                    }                    
-                }
-                else
-                    return -1;
-            }
-            if (codigoFonte.charAt(inicio + offset) == '\"') {
-                numeroParDeAspas = !numeroParDeAspas;
-                ultimoIndiceAspas = inicio + offset;
-            } else if (codigoFonte.charAt(inicio + offset) == c)
-                ultimoIndicePntVrg = inicio + offset;
-            offset++;
-        }
-        return ultimoIndicePntVrg;
-    }
-
     // analisa expressões booleanas.
     public boolean analiseCondicional(int inicio, int fim) throws Erro {
         ignoraWhiteSpace();
@@ -572,64 +563,6 @@ public class Parser {
         }
         return var.valor.toString();
 
-    }
-
-    public boolean verificaEnquanto() throws Erro{
-        //ignoraWhiteSpace();
-        Matcher comparador = Pattern.compile("enquanto\\s*\\(").matcher(codigoFonte);
-        if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-            int iniciodobloco = comparador.end();
-            indiceAbsoluto = comparador.end(); // não consideramos o abre parênteses.
-            int indiceFechaParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
-            boolean condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
-            indiceAbsoluto++; // considerando )
-            comparador = Pattern.compile("\\s*\\{\\s*").matcher(codigoFonte);
-
-            if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-                indiceAbsoluto = comparador.end();
-                int indiceFechaChaves = indiceParDeSinal('{');    
-            
-                while (condicional) {
-                    indiceAbsoluto = comparador.end();
-                    Variavel.novoEscopo();
-                    resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
-                    Variavel.removeEscopo();
-                    indiceAbsoluto = iniciodobloco;
-                    condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
-                }
-                indiceAbsoluto = indiceFechaChaves + 1;     
-                    
-                return true;
-            }
-            else 
-                throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
-        
-        }
-        return false;
-    }
-    
-    
-
-    //public boolean verificaPara() throws Erro {}
-
-    // O nosso print(); que se chama imprime();
-    public boolean verificaImprimeTexto() throws Erro {
-        boolean retorno;
-        Matcher comparador = Pattern.compile("imprime\\s*\\(").matcher(codigoFonte);
-        if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-
-            retorno = true;
-            indiceAbsoluto += comparador.group().length();
-            int indiceParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
-            String s = avaliaExpressaoDePalavras(indiceAbsoluto, indiceParenteses - 1);
-            System.out.println(s);
-            
-            ignoraWhiteSpace();
-            indiceAbsoluto = proximoCharNaoContidoEmString(indiceParenteses, ';', false) + 1;
-        } else {
-            retorno = false;
-        }
-        return retorno;
     }
 
     // esta função recebe uma expressão aritmética simples e retorna o resultado
@@ -816,6 +749,63 @@ public class Parser {
         indiceAbsoluto += comparador.group().length();
 
         return Double.parseDouble(var.valor.toString());
+    }
+
+    // considera que o char anterior é um { ou  ( e retorna o índice do } ou ) respectivo.
+    // joga erros caso não encontre.
+    private int indiceParDeSinal(char sinal) throws Erro {
+        char sinalContrario = sinal == '{'? '}': ')';
+        int paridadeChave = 1,
+            offset = 0;
+        boolean contidoEmAspas = false;
+        while(paridadeChave != 0 && indiceAbsoluto + offset < comprimentoDoPrograma - 1) {
+            if(codigoFonte.charAt(indiceAbsoluto + offset) == sinal && !contidoEmAspas)
+                paridadeChave++;
+            else if(codigoFonte.charAt(indiceAbsoluto + offset) == sinalContrario && !contidoEmAspas)
+                paridadeChave--;
+            else if(codigoFonte.charAt(indiceAbsoluto + offset) == '\"')
+                contidoEmAspas = !contidoEmAspas;
+            offset++;
+        }
+
+        if(indiceAbsoluto + offset > comprimentoDoPrograma - 1)
+            if(sinal == '{')
+                throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
+            else
+                throw new NumeroInadequadoParenteses(codigoFonte, indiceAbsoluto);
+        return indiceAbsoluto + (offset);
+    }
+
+    // retorna o índice do próximo ponto e vírgula garantido de não
+    // pertencer à uma string/palavra. então, por exemplo,
+    // ";" + ";";
+    // retornaria 7. retorna -1 caso não encontre e caractereOpcional seja true.
+    public int proximoCharNaoContidoEmString(int inicio, char c, boolean caractereOpcional) throws Erro {
+        boolean numeroParDeAspas = true;
+        int ultimoIndiceAspas = 0, ultimoIndicePntVrg = 0, offset = 0;
+        while (!(numeroParDeAspas && ultimoIndicePntVrg > ultimoIndiceAspas)) {
+            if (inicio + offset > comprimentoDoPrograma - 1) {
+                if (!caractereOpcional) {
+                    switch(c) {
+                        case '\"':
+                            throw new AusenciaAspas(codigoFonte, indiceAbsoluto);
+                        case ';':
+                            throw new AusenciaPontoEVirgula(codigoFonte, indiceAbsoluto);
+                        case ')':
+                            throw new AusenciaParenteses(codigoFonte, indiceAbsoluto);
+                    }                    
+                }
+                else
+                    return -1;
+            }
+            if (codigoFonte.charAt(inicio + offset) == '\"') {
+                numeroParDeAspas = !numeroParDeAspas;
+                ultimoIndiceAspas = inicio + offset;
+            } else if (codigoFonte.charAt(inicio + offset) == c)
+                ultimoIndicePntVrg = inicio + offset;
+            offset++;
+        }
+        return ultimoIndicePntVrg;
     }
 
     // pula todos os espaços em branco.
