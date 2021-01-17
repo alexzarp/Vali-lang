@@ -95,7 +95,6 @@ Sinal | Ação
 <= | Compara se o primeiro valor é menor ou igual ao segundo
 \>= | Compara se o primeiro valor é maior ou igual ao segundo
 != | Compara se os valores são diferentes
-% | Compara o resto da divisão entre dois valores
 
 Funcionam apenas entre valores do tipo ``inteiro`` e ``flutuante``.
 
@@ -117,8 +116,7 @@ Sinal | Ação
 ! | Inverte o valor de um ``binario``. Deve ser utilizado como prefixo. **Apenas para variáveis.**
 
 Exemplos:
-* ``binario a = !2>3;``
-* ``se(!falso)``
+* ``binario a = verdadeiro; binario b = !a;``
 
 ## **Declaração de variável:**
 ``
