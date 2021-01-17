@@ -116,7 +116,7 @@ Sinal | Ação
 ! | Inverte o valor de um ``binario``. Deve ser utilizado como prefixo. **Apenas para variáveis.**
 
 Exemplos:
-* ``binario a = verdadeiro; binario b = !a``
+* ``binario a = verdadeiro; binario b = !a;``
 
 ## **Declaração de variável:**
 ``
