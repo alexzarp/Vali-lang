@@ -1,5 +1,16 @@
+/*
+Este é um interpretador de texto capaz de ler uma sintaxe própria como linguagem de programação, compilá-la e rodá-la
+usando o Java. Tem como objetivo compor uma nota na disciplina de Programação I no Curso de Ciência na UFFS.
+
+Autores desse programa: Alex Sandro Zarpelon, alexszds@gmail.com
+                        Bruna Gabriela Disner, bruna.disner@gmail.com
+                        Patrícia Trevisan, patitrev@gmail.com
+                        Rafael Fernandes, rflgf0@gmail.com
+*/
+
 import java.nio.file.Paths;
 import java.util.Scanner;
+
 public class Vali {
 
     public static void main(String[] args) {
