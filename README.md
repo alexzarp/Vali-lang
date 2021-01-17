@@ -19,7 +19,7 @@ enquanto, equivalente a while | enquanto(a > b) {faça;}
 imprime, equivalente a print | imprime("Olá mundo" + a); → "+" concatena elementos de qualquer tipo
 tipo variavel = valor ou vazio; | inteiro num = 1;
 
-
+O corpo de todas as funções começão com ``{`` e terminam com ``}``, independente de terem uma ou múltiplas declarações.
 Salvo caracteres dentro de aspas, a linguagem não é sensível aos caracteres quebra de linha, espaço e tab. Você pode formatar o código fonte com estes como quiser (porém outros caracteres como carriage return podem causar erros).
 
 
@@ -80,10 +80,15 @@ Operador | Operação
 \- | Subtração
 / | Divisão
 \* | Multiplicação
+ % | Resto
 
+<<<<<<< HEAD
 Utilize inteiro para divisões inteiras e flutuante para resultados racionais.
 <br>
 Atente-se de que, primeiro são feitas operações que contém sinal, por exemplo -a ou -1, após isso os * % / e logo após os + -.
+=======
+Utilize ``inteiro`` para salvar resultados de divisões inteiras e ``flutuante`` para resultados racionais.
+>>>>>>> a2247e641582119f9b5a536bd69209b332ccfbfe
 
 
 ## **Sinais comparativos:**
@@ -114,7 +119,7 @@ Funcionam apenas entre valores do tipo binario. Exemplos:
 ## **Sinal unário:**
 Sinal | Ação
 :-----:|:--------:
-! | Inverte o valor de um ``binario``. Deve ser utilizado como prefixo.
+! | Inverte o valor de um ``binario``. Deve ser utilizado como prefixo. **Apenas para variáveis.**
 
 Exemplos:
 * ``binario a = !2>3;``
