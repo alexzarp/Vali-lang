@@ -93,6 +93,9 @@ Sinal | Ação
 <= | Compara se o primeiro valor é menor ou igual ao segundo
 \>= | Compara se o primeiro valor é maior ou igual ao segundo
 != | Compara se os valores são diferentes
+<!-- % | Compara o resto da divisão entre dois valores -->
+
+Atente-se de que, primeiro são feitas operações que contém sina, por exemplo -a ou -1, após isso os * % / e logo após os + -
 
 Funcionam apenas entre valores do tipo ``inteiro`` e ``flutuante``.
 

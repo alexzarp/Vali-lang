@@ -27,7 +27,7 @@ public class Vali {
                 // lê o arquivo como uma String.
                 Parser p = new Parser(codigoFonte);
                 p.analisa();
-                Variavel.imprimeVariaveis();
+                //Variavel.imprimeVariaveis();
             } else
                 System.out.println("Arquivo .vali não encontrado.");
 
