@@ -19,42 +19,38 @@ public class Parser {
 
     public void analisa() throws Erro {
         Variavel.novoEscopo();
-        resolveCorpo(indiceAbsoluto, comprimentoDoPrograma - 1);
+        resolveCorpo(comprimentoDoPrograma - 2);
     }
 
     // resolve qualquer atribuição, com expressão algébrica e terminada em ;
-    public void resolveCorpo(int inicio, int fim) throws Erro {
-
+    public void resolveCorpo(int fim) throws Erro {
         Matcher comparador;
 
-        while (indiceAbsoluto < fim) {
+        while (indiceAbsoluto <= fim) {
             ignoraWhiteSpace();
             if(verificaComentario());
             else {
-                // expressão regular para algo no formato "palavra palavra123(" ou "palavra123("
-                comparador = Pattern.compile("(\\s*[a-zA-Z]+\\s)?([a-zA-Z]+\\w*\\s*\\()").matcher(codigoFonte);
+                // expressão regular para algo no formato palavra("
+                comparador = Pattern.compile("[a-zA-Z]+\\s*\\(").matcher(codigoFonte);
                 // se entrar, é porque encontrou uma chamada ou definição de função (laços
                 // e condicionais inclusive)
                 if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                     if(!(
-                        verificaImprimeTexto()        ||
-                        verificaSe()                  ||
-                        verificaEnquanto()            
-                        //  verificaPara()             ||
-                        //  verificaAtribuicaoFuncao()
+                        verificaImprimeTexto() ||
+                        verificaSe()           ||
+                        verificaEnquanto()           
                     ))
                         throw new TokenInesperado(codigoFonte, indiceAbsoluto);
 
                 } else {
                     // como não é nenhuma função, resta apenas testar se há uma atribuição.
-                    if (!verificaAtribuicaoVariavel()) {
+                    if (!verificaAtribuicaoVariavel()) 
                         // como a linha não se adequa a nenhum dos contextos possíveis, apenas dizemos
                         // que o token é inesperado.
                         throw new TokenInesperado(codigoFonte, indiceAbsoluto);
-                    }
-
                 }
             }
+            ignoraWhiteSpace();
         }
     }
 
@@ -64,7 +60,8 @@ public class Parser {
         if (c == '/' || c == '\\') {
             while (c != '\n' && indiceAbsoluto < comprimentoDoPrograma - 1) {
                 indiceAbsoluto++;
-                c = codigoFonte.charAt(indiceAbsoluto);
+                if(indiceAbsoluto < comprimentoDoPrograma - 1)
+                    c = codigoFonte.charAt(indiceAbsoluto);
             }
             indiceAbsoluto++;
             return true;
@@ -83,14 +80,13 @@ public class Parser {
             if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                 indiceAbsoluto = comparador.end();
                 int indiceFechaChaves = indiceParDeChaves();
-
                 if(condicional) {
                     Variavel.novoEscopo();
-                    resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
+                    resolveCorpo(indiceFechaChaves - 2);
                     Variavel.removeEscopo();
                 }
 
-                indiceAbsoluto = indiceFechaChaves + 1;
+                indiceAbsoluto = indiceFechaChaves;
 
                 // verificamos se há a existência de um bloco else.
                 comparador = Pattern.compile("\\s*senao\\s*\\{\\s*").matcher(codigoFonte);
@@ -99,10 +95,10 @@ public class Parser {
                     indiceFechaChaves = indiceParDeChaves();
                     if(!condicional) {
                         Variavel.novoEscopo();
-                        resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
+                        resolveCorpo(indiceFechaChaves - 2);
                         Variavel.removeEscopo();
                     }
-                    indiceAbsoluto = indiceFechaChaves + 1;
+                    indiceAbsoluto = indiceFechaChaves;
                 }
                 
                 return true;
@@ -132,12 +128,12 @@ public class Parser {
                 while (condicional) {
                     indiceAbsoluto = comparador.end();
                     Variavel.novoEscopo();
-                    resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
+                    resolveCorpo(indiceFechaChaves - 2);
                     Variavel.removeEscopo();
                     indiceAbsoluto = iniciodobloco;
                     condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
                 }
-                indiceAbsoluto = indiceFechaChaves + 1;     
+                indiceAbsoluto = indiceFechaChaves;     
                     
                 return true;
             }
@@ -749,7 +745,7 @@ public class Parser {
         }
 
         // procuramos por um produto ou divisão (inteira).
-        comparador = Pattern.compile("[\\*/]").matcher(codigoFonte);
+        comparador = Pattern.compile("[\\*/%]").matcher(codigoFonte);
         if (comparador.find(indiceAbsoluto) && comparador.end() <= fim) { // encontrou uma multiplicação ou divisão.
             double parteEsquerda, parteDireita;
             switch (comparador.group()) {
@@ -819,13 +815,14 @@ public class Parser {
 
     // pula todos os espaços em branco.
     private void ignoraWhiteSpace() {
-        if (indiceAbsoluto > comprimentoDoPrograma) {
+        if (indiceAbsoluto > comprimentoDoPrograma - 1) {
             return;
         }
         char c = codigoFonte.charAt(indiceAbsoluto);
-        while (indiceAbsoluto < comprimentoDoPrograma && (c == ' ' || c == '\n' || c == '\t')) {
+        while (indiceAbsoluto < comprimentoDoPrograma - 1 && (c == ' ' || c == '\n' || c == '\t')) {
             indiceAbsoluto++;
-            c = codigoFonte.charAt(indiceAbsoluto);
+            if(indiceAbsoluto < comprimentoDoPrograma - 1)
+                c = codigoFonte.charAt(indiceAbsoluto);
         }
     }
 }

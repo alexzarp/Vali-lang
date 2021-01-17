@@ -3,3 +3,5 @@ Fonte/SourceClass/*.class
 Fonte/*.class
 Fonte/*.vali
 Fonte/SourceClass/*.vali
+.vscode
+.json

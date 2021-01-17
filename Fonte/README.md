@@ -4,4 +4,4 @@
 #### Para a compilação:
 `javac *.java -d SourceClass`
 #### Para rodar:
-`java /SourceClass/Vali`
+`java /SourceClass/Vali nomedoarquivo.vali`

@@ -82,6 +82,8 @@ Operador | Operação
 \* | Multiplicação
 
 Utilize inteiro para divisões inteiras e flutuante para resultados racionais.
+<br>
+Atente-se de que, primeiro são feitas operações que contém sinal, por exemplo -a ou -1, após isso os * % / e logo após os + -.
 
 
 ## **Sinais comparativos:**
@@ -93,9 +95,7 @@ Sinal | Ação
 <= | Compara se o primeiro valor é menor ou igual ao segundo
 \>= | Compara se o primeiro valor é maior ou igual ao segundo
 != | Compara se os valores são diferentes
-<!-- % | Compara o resto da divisão entre dois valores -->
-
-Atente-se de que, primeiro são feitas operações que contém sina, por exemplo -a ou -1, após isso os * % / e logo após os + -
+% | Compara o resto da divisão entre dois valores
 
 Funcionam apenas entre valores do tipo ``inteiro`` e ``flutuante``.
 
@@ -130,3 +130,9 @@ inteiro varivel = 0;
 flutuante variavel2 = 0.0;
 binario variavel3 = falso;
 palavra variavel4 = "Olá mundo!";
+
+## **Comentários no código:**
+Sinal | Ação
+:--:|:--:
+\ | Ignora uma linha de código até o próximo \n
+/ | Ignora uma linha de código até o próximo \n
