@@ -15,16 +15,13 @@ public abstract class Variavel extends Primitivo {
     // então é um literal ou índice de um vetor
     public String nome;
 
-    protected Object valor;
-
-    static final String palavrasReservadas[] = {"inteiro", "palavra", "flutuante", "vazio", "binario",
-                                                "para", "enquanto", "imprime", "escaneia", "se", "senao",
+    static final String palavrasReservadas[] = {"inteiro", "palavra", "flutuante", "binario",
+                                                "para", "enquanto", "imprime", "se", "senao",
                                                 "verdadeiro", "falso"};
 
     public Variavel(String nome, Tipos tipo, Object valor) {
         super(tipo, valor);
         this.nome = nome;
-        this.valor = valor;
     }
     
     abstract void setValor(Object valor) throws Erro;
@@ -46,12 +43,10 @@ public abstract class Variavel extends Primitivo {
 
         // se entrar aqui, é porque uma variável de mesmo nome já existe.
         if(getVariavel(variavel.nome) != null)
-            // TODO escolher tipo adequado de erro para jogar.
             throw new RedefinicaoVariavelExistente(codigoFonte, indiceAbsoluto);
         
         // se entrar aqui, é porque a variável é uma palavra reservada.
         if(verificaPalavraReservada(variavel.nome))
-            // TODO jogar erro de tipo apropriado.
             throw new PalavraReservada(codigoFonte, indiceAbsoluto);
 
         variaveis.get(escopoAtual).put(variavel.nome, variavel);
