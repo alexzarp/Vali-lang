@@ -31,17 +31,18 @@ public class Parser {
             ignoraWhiteSpace();
             if(verificaComentario());
             else {
-                // expressão regular para algo no formato "palavra("
-                comparador = Pattern.compile("[a-zA-Z]+\\s*\\(").matcher(codigoFonte);
+                // expressão regular para algo no formato "palavra palavra123(" ou "palavra123("
+                comparador = Pattern.compile("(\\s*[a-zA-Z]+\\s)?([a-zA-Z]+\\w*\\s*\\()").matcher(codigoFonte);
                 // se entrar, é porque encontrou uma chamada ou definição de função (laços
                 // e condicionais inclusive)
                 if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                     if(!(
-                        verificaImprimeTexto() ||
-                        verificaSe()           ||
+                        verificaImprimeTexto()        ||
+                        verificaSe()                  ||
                         verificaEnquanto()            
-                        //  verificaPara()             
-                      ))
+                        //  verificaPara()             ||
+                        //  verificaAtribuicaoFuncao()
+                    ))
                         throw new TokenInesperado(codigoFonte, indiceAbsoluto);
 
                 } else {
@@ -51,9 +52,14 @@ public class Parser {
                         // que o token é inesperado.
                         throw new TokenInesperado(codigoFonte, indiceAbsoluto);
                     }
+
                 }
             }
         }
+    }
+
+    // TODO implementar isso.
+    private void verificaAtribuicaoFuncao() throws Erro {
     }
 
     private boolean verificaComentario() {
@@ -80,7 +86,7 @@ public class Parser {
             comparador = Pattern.compile("\\s*\\{\\s*").matcher(codigoFonte);
             if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                 indiceAbsoluto = comparador.end();
-                int indiceFechaChaves = indiceParDeSinal('{');
+                int indiceFechaChaves = indiceParDeChaves();
 
                 if(condicional) {
                     Variavel.novoEscopo();
@@ -94,7 +100,7 @@ public class Parser {
                 comparador = Pattern.compile("\\s*senao\\s*\\{\\s*").matcher(codigoFonte);
                 if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
                     indiceAbsoluto = comparador.end();
-                    indiceFechaChaves = indiceParDeSinal('{');
+                    indiceFechaChaves = indiceParDeChaves();
                     if(!condicional) {
                         Variavel.novoEscopo();
                         resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
@@ -111,59 +117,27 @@ public class Parser {
         return false;
     }
 
-    public boolean verificaEnquanto() throws Erro{
-        //ignoraWhiteSpace();
-        Matcher comparador = Pattern.compile("enquanto\\s*\\(").matcher(codigoFonte);
-        if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-            int iniciodobloco = comparador.end();
-            indiceAbsoluto = comparador.end(); // não consideramos o abre parênteses.
-            int indiceFechaParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
-            boolean condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
-            indiceAbsoluto++; // considerando )
-            comparador = Pattern.compile("\\s*\\{\\s*").matcher(codigoFonte);
-
-            if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-                indiceAbsoluto = comparador.end();
-                int indiceFechaChaves = indiceParDeSinal('{');    
-            
-                while (condicional) {
-                    indiceAbsoluto = comparador.end();
-                    Variavel.novoEscopo();
-                    resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
-                    Variavel.removeEscopo();
-                    indiceAbsoluto = iniciodobloco;
-                    condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
-                }
-                indiceAbsoluto = indiceFechaChaves + 1;     
-                    
-                return true;
-            }
-            else 
-                throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
-        
+    // considera que o char anterior é um { e retorna o índice do } respectivo.
+    // joga erros caso não encontre.
+    private int indiceParDeChaves() throws Erro {
+        int paridadeChave = 1,
+            offset = 0;
+        boolean contidoEmAspas = false;
+        while(paridadeChave != 0 && indiceAbsoluto + offset < comprimentoDoPrograma - 1) {
+            if(codigoFonte.charAt(indiceAbsoluto + offset) == '{' && !contidoEmAspas)
+                paridadeChave++;
+            else if(codigoFonte.charAt(indiceAbsoluto + offset) == '}' && !contidoEmAspas)
+                paridadeChave--;
+            else if(codigoFonte.charAt(indiceAbsoluto + offset) == '\"')
+                contidoEmAspas = !contidoEmAspas;
+            offset++;
         }
-        return false;
+
+        if(indiceAbsoluto + offset > comprimentoDoPrograma - 1)
+            throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
+        return indiceAbsoluto + (offset);
     }
 
-    // O nosso print(); que se chama imprime();
-    public boolean verificaImprimeTexto() throws Erro {
-        boolean retorno;
-        Matcher comparador = Pattern.compile("imprime\\s*\\(").matcher(codigoFonte);
-        if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-
-            retorno = true;
-            indiceAbsoluto += comparador.group().length();
-            int indiceParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
-            String s = avaliaExpressaoDePalavras(indiceAbsoluto, indiceParenteses - 1);
-            System.out.println(s);
-            
-            ignoraWhiteSpace();
-            indiceAbsoluto = proximoCharNaoContidoEmString(indiceParenteses, ';', false) + 1;
-        } else {
-            retorno = false;
-        }
-        return retorno;
-    }
 
     // verifica e resolve atribuições de variáveis, tanto criações quanto alterações.
     // retorna true caso encontre uma atribuição e false caso contrário.
@@ -217,7 +191,7 @@ public class Parser {
                         Inteiro i = new Inteiro(nomeVariavel, valorInteiro);
                         Variavel.setVariavel(i, codigoFonte, indiceAbsoluto);
                         ignoraWhiteSpace();
-                        indiceAbsoluto = comparador.end(); // considerando ";"
+                        indiceAbsoluto++; // considerando ";"
                         return true;
                     }
                 }
@@ -267,7 +241,7 @@ public class Parser {
                         Flutuante i = new Flutuante(nomeVariavel, valorFlutuante);
                         Variavel.setVariavel(i, codigoFonte, indiceAbsoluto);
                         ignoraWhiteSpace();
-                        indiceAbsoluto = comparador.end(); // considerando ";"
+                        indiceAbsoluto++; // considerando ";"
                         return true;
                     }
                 }
@@ -413,6 +387,38 @@ public class Parser {
             }
         }
         return false;
+    }
+
+    // retorna o índice do próximo ponto e vírgula garantido de não
+    // pertencer à uma string/palavra. então, por exemplo,
+    // ";" + ";";
+    // retornaria 7. retorna -1 caso não encontre e caractereOpcional seja true.
+    public int proximoCharNaoContidoEmString(int inicio, char c, boolean caractereOpcional) throws Erro {
+        boolean numeroParDeAspas = true;
+        int ultimoIndiceAspas = 0, ultimoIndicePntVrg = 0, offset = 0;
+        while (!(numeroParDeAspas && ultimoIndicePntVrg > ultimoIndiceAspas)) {
+            if (inicio + offset > comprimentoDoPrograma - 1) {
+                if (!caractereOpcional) {
+                    switch(c) {
+                        case '\"':
+                            throw new AusenciaAspas(codigoFonte, indiceAbsoluto);
+                        case ';':
+                            throw new AusenciaPontoEVirgula(codigoFonte, indiceAbsoluto);
+                        case ')':
+                            throw new AusenciaParenteses(codigoFonte, indiceAbsoluto);
+                    }                    
+                }
+                else
+                    return -1;
+            }
+            if (codigoFonte.charAt(inicio + offset) == '\"') {
+                numeroParDeAspas = !numeroParDeAspas;
+                ultimoIndiceAspas = inicio + offset;
+            } else if (codigoFonte.charAt(inicio + offset) == c)
+                ultimoIndicePntVrg = inicio + offset;
+            offset++;
+        }
+        return ultimoIndicePntVrg;
     }
 
     // analisa expressões booleanas.
@@ -565,6 +571,69 @@ public class Parser {
 
     }
 
+    public boolean verificaEnquanto() throws Erro{
+        //ignoraWhiteSpace();
+        Matcher comparador = Pattern.compile("enquanto\\s*\\(").matcher(codigoFonte);
+        if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+            int iniciodobloco = comparador.end();
+            indiceAbsoluto = comparador.end(); // não consideramos o abre parênteses.
+            int indiceFechaParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
+            boolean condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
+            indiceAbsoluto++; // considerando )
+            comparador = Pattern.compile("\\s*\\{\\s*").matcher(codigoFonte);
+
+            if(comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+                indiceAbsoluto = comparador.end();
+                int indiceFechaChaves = indiceParDeChaves();    
+            
+                while (condicional) {
+                    indiceAbsoluto = comparador.end();
+                    Variavel.novoEscopo();
+                    resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
+                    Variavel.removeEscopo();
+                    indiceAbsoluto = iniciodobloco;
+                    condicional = analiseCondicional(indiceAbsoluto, indiceFechaParenteses - 1);
+                }
+                indiceAbsoluto = indiceFechaChaves + 1;     
+                    
+                return true;
+            }
+            else 
+                throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
+        
+        }
+        return false;
+    }
+
+    public boolean verificaPara() throws Erro {
+        Matcher comparador = Pattern.compile("para\\s*\\(").matcher(codigoFonte);
+        if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+
+            
+
+        }
+    }
+
+    // O nosso print(); que se chama imprime();
+    public boolean verificaImprimeTexto() throws Erro {
+        boolean retorno;
+        Matcher comparador = Pattern.compile("imprime\\s*\\(").matcher(codigoFonte);
+        if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
+
+            retorno = true;
+            indiceAbsoluto += comparador.group().length();
+            int indiceParenteses = proximoCharNaoContidoEmString(indiceAbsoluto, ')', false);
+            String s = avaliaExpressaoDePalavras(indiceAbsoluto, indiceParenteses - 1);
+            System.out.println(s);
+            
+            ignoraWhiteSpace();
+            indiceAbsoluto = proximoCharNaoContidoEmString(indiceParenteses, ';', false) + 1;
+        } else {
+            retorno = false;
+        }
+        return retorno;
+    }
+
     // esta função recebe uma expressão aritmética simples e retorna o resultado
     // dela, independente variações de espaçamentos.
     // ex: "21+2*3" retorna 27.
@@ -574,21 +643,19 @@ public class Parser {
         Matcher comparador;
 
         ignoraWhiteSpace();
-    
-        // procuramos por uma soma ou subtração (mais especificamente, como operação binária).
-        // procura por algo no formato a+ ou a-, a sendo qualquer char que não seja operação.
-        comparador = Pattern.compile("[^\\+\\*-/\\s]\\s*[\\+-]").matcher(codigoFonte);
-        if (comparador.find(indiceAbsoluto) && comparador.end() <= fim) {
+
+        // procuramos por uma soma ou subtração.
+        comparador = Pattern.compile("[\\+-]").matcher(codigoFonte);
+        if (comparador.find(inicio) && comparador.end() <= fim) { // encontrou uma soma ou subtração.
             int parteEsquerda, parteDireita;
-            int offsetOperacao = comparador.group().length() - 1;
-            switch (comparador.group().charAt(offsetOperacao)) { // capturamos o último elemento do grupo, isto é, a operação em si.
-                case '+':
-                    parteEsquerda = avaliaExpressaoDeInteiros(indiceAbsoluto, indiceAbsoluto + offsetOperacao);
+            switch (comparador.group()) {
+                case "+":
+                    parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
                     return parteEsquerda + parteDireita;
-                case '-':
-                    parteEsquerda = avaliaExpressaoDeInteiros(indiceAbsoluto, indiceAbsoluto + offsetOperacao);
+                case "-":
+                    parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
                     return parteEsquerda - parteDireita;
@@ -597,27 +664,20 @@ public class Parser {
 
         // procuramos por um produto ou divisão (inteira).
         comparador = Pattern.compile("[\\*/]").matcher(codigoFonte);
-        if (comparador.find(indiceAbsoluto) && comparador.end() <= fim) { // encontrou uma multiplicação ou divisão.
+        if (comparador.find(inicio) && comparador.end() <= fim) { // encontrou uma multiplicação ou divisão.
             int parteEsquerda, parteDireita;
             switch (comparador.group()) {
                 case "*":
-                    parteEsquerda = avaliaExpressaoDeInteiros(indiceAbsoluto, comparador.start() - 1);
+                    parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
                     return parteEsquerda * parteDireita;
                 case "/":
-                    parteEsquerda = avaliaExpressaoDeInteiros(indiceAbsoluto, comparador.start() - 1);
+                    parteEsquerda = avaliaExpressaoDeInteiros(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeInteiros(comparador.end(), fim);
                     return parteEsquerda / parteDireita;
             }
-        }
-    
-        // agora procuramos por operações unárias.
-        comparador = Pattern.compile("-\\s*\\w+").matcher(codigoFonte);
-        if (comparador.find(inicio) && comparador.start() <= fim) { // encontrou uma soma ou subtração.
-            indiceAbsoluto++; // considerando o -
-            return -avaliaExpressaoDeInteiros(indiceAbsoluto, fim);
         }
 
         /*
@@ -630,7 +690,7 @@ public class Parser {
         // o caso.
         comparador = Pattern.compile("\\s*\\d+\\s*").matcher(codigoFonte);
         if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-            int resultado = Integer.parseInt(valor);
+            int resultado = Integer.parseInt(valor.toString().trim());
 
             indiceAbsoluto += comparador.group().length();
 
@@ -641,11 +701,11 @@ public class Parser {
          * resta apenas verificar se é uma chamada de função com retorno inteiro ou uma
          * variável do tipo inteiro. por hora apenas tratamos variáveis e não funções.
          */
-        System.out.println("aqyuekle oiyutro gurpo: " + codigoFonte.substring(indiceAbsoluto, fim  + 1));
+
         comparador = Pattern.compile("\\s*[a-zA-Z]+\\w*\\s*").matcher(codigoFonte); // mesmas regras de nomeação do Java.
         comparador.find(indiceAbsoluto);
-        valor = comparador.group().trim();
-        Variavel var = Variavel.getVariavel(valor);
+        valor = comparador.group();
+        Variavel var = Variavel.getVariavel(valor.trim());
 
         // a variável não existe.
         if (var == null)
@@ -659,6 +719,7 @@ public class Parser {
 
         indiceAbsoluto += comparador.group().length();
         return Integer.parseInt(var.valor.toString());
+
     }
 
     public double avaliaExpressaoDeFlutuantes(int inicio, int fim) throws Erro {
@@ -667,20 +728,18 @@ public class Parser {
 
         ignoraWhiteSpace();
 
-       // procuramos por uma soma ou subtração (mais especificamente, como operação binária).
-        // procura por algo no formato a+ ou a-, a sendo qualquer char que não seja operação.
-        comparador = Pattern.compile("[^\\+\\*-/\\s]\\s*[\\+-]").matcher(codigoFonte);
-        if (comparador.find(indiceAbsoluto) && comparador.end() <= fim) {
+        // procuramos por uma soma ou subtração.
+        comparador = Pattern.compile("[\\+-]").matcher(codigoFonte);
+        if (comparador.find(inicio) && comparador.end() <= fim) { // encontrou uma soma ou subtração.
             double parteEsquerda, parteDireita;
-            int offsetOperacao = comparador.group().length() - 1;
-            switch (comparador.group().charAt(offsetOperacao)) { // capturamos o último elemento do grupo, isto é, a operação em si.
-                case '+':
-                    parteEsquerda = avaliaExpressaoDeFlutuantes(indiceAbsoluto, indiceAbsoluto + offsetOperacao);
+            switch (comparador.group()) {
+                case "+":
+                    parteEsquerda = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
                     return parteEsquerda + parteDireita;
-                case '-':
-                    parteEsquerda = avaliaExpressaoDeFlutuantes(indiceAbsoluto, indiceAbsoluto + offsetOperacao);
+                case "-":
+                    parteEsquerda = avaliaExpressaoDeFlutuantes(inicio, comparador.start() - 1);
                     indiceAbsoluto++;
                     parteDireita = avaliaExpressaoDeFlutuantes(comparador.end(), fim);
                     return parteEsquerda - parteDireita;
@@ -705,13 +764,6 @@ public class Parser {
             }
         }
 
-        // agora procuramos por operações unárias.
-        comparador = Pattern.compile("-\\s*\\w+").matcher(codigoFonte);
-        if (comparador.find(inicio) && comparador.start() <= fim) { // encontrou uma soma ou subtração.
-            indiceAbsoluto++; // considerando o -
-            return -avaliaExpressaoDeInteiros(indiceAbsoluto, fim);
-        }
-        
         /*
          * resolvidas todas as operações, podemos apenas tentar avaliar o resultado que
          * temos e retorná-lo.
@@ -722,7 +774,7 @@ public class Parser {
         // o caso.
         comparador = Pattern.compile("(\\s*\\d+\\.\\d+\\s*)|(\\s*\\d+\\s*)").matcher(codigoFonte);
         if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
-            double resultado = Double.parseDouble(valor);
+            double resultado = Double.parseDouble(valor.toString().trim());
             indiceAbsoluto += comparador.group().length();
             return resultado;
         }
@@ -749,63 +801,6 @@ public class Parser {
         indiceAbsoluto += comparador.group().length();
 
         return Double.parseDouble(var.valor.toString());
-    }
-
-    // considera que o char anterior é um { ou  ( e retorna o índice do } ou ) respectivo.
-    // joga erros caso não encontre.
-    private int indiceParDeSinal(char sinal) throws Erro {
-        char sinalContrario = sinal == '{'? '}': ')';
-        int paridadeChave = 1,
-            offset = 0;
-        boolean contidoEmAspas = false;
-        while(paridadeChave != 0 && indiceAbsoluto + offset < comprimentoDoPrograma - 1) {
-            if(codigoFonte.charAt(indiceAbsoluto + offset) == sinal && !contidoEmAspas)
-                paridadeChave++;
-            else if(codigoFonte.charAt(indiceAbsoluto + offset) == sinalContrario && !contidoEmAspas)
-                paridadeChave--;
-            else if(codigoFonte.charAt(indiceAbsoluto + offset) == '\"')
-                contidoEmAspas = !contidoEmAspas;
-            offset++;
-        }
-
-        if(indiceAbsoluto + offset > comprimentoDoPrograma - 1)
-            if(sinal == '{')
-                throw new ContagemIrregularChaves(codigoFonte, indiceAbsoluto);
-            else
-                throw new NumeroInadequadoParenteses(codigoFonte, indiceAbsoluto);
-        return indiceAbsoluto + (offset);
-    }
-
-    // retorna o índice do próximo ponto e vírgula garantido de não
-    // pertencer à uma string/palavra. então, por exemplo,
-    // ";" + ";";
-    // retornaria 7. retorna -1 caso não encontre e caractereOpcional seja true.
-    public int proximoCharNaoContidoEmString(int inicio, char c, boolean caractereOpcional) throws Erro {
-        boolean numeroParDeAspas = true;
-        int ultimoIndiceAspas = 0, ultimoIndicePntVrg = 0, offset = 0;
-        while (!(numeroParDeAspas && ultimoIndicePntVrg > ultimoIndiceAspas)) {
-            if (inicio + offset > comprimentoDoPrograma - 1) {
-                if (!caractereOpcional) {
-                    switch(c) {
-                        case '\"':
-                            throw new AusenciaAspas(codigoFonte, indiceAbsoluto);
-                        case ';':
-                            throw new AusenciaPontoEVirgula(codigoFonte, indiceAbsoluto);
-                        case ')':
-                            throw new AusenciaParenteses(codigoFonte, indiceAbsoluto);
-                    }                    
-                }
-                else
-                    return -1;
-            }
-            if (codigoFonte.charAt(inicio + offset) == '\"') {
-                numeroParDeAspas = !numeroParDeAspas;
-                ultimoIndiceAspas = inicio + offset;
-            } else if (codigoFonte.charAt(inicio + offset) == c)
-                ultimoIndicePntVrg = inicio + offset;
-            offset++;
-        }
-        return ultimoIndicePntVrg;
     }
 
     // pula todos os espaços em branco.
