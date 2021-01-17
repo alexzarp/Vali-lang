@@ -1,6 +1,6 @@
 ![Imagem Logo](https://github.com/alexzarp/Vali-lang/blob/main/Utilidades/logo.png?raw=true)
 
-#### Esta é a linguagem Vali-lang, produzida pelos alunos <a href="https://github.com/alexzarp">Alex Sandro Zarpelon</a>(<a href="mailto:alexszds@gmail.com">alexszds@gmail.com</a>), <a href="https://github.com/Brunadisner">Bruna Gabriela Disner</a>(<a href="mailto:bruna.disner@gmail.com">bruna.disner@gmail.com</a>), <a href="https://github.com/patitrev">Patrícia Trevisan</a>(<a href="mailto:patitrev@gmail.com">patitrev@gmail.com</a>) e <a href="https://github.com/rflgf">Rafael Fernandes</a>(<a href="mailto:rflgf0@gmail.com">rflgf0@gmail.com</a>).
+#### Este é um interpretador de texto capaz de ler uma sintaxe própria como linguagem de programação, compilá-la e rodá-la usando o Java. Tem como objetivo compor uma nota na disciplina de Programação I no Curso de Ciência da Computação na UFFS. Produzida pelos alunos <a href="https://github.com/alexzarp">Alex Sandro Zarpelon</a>(<a href="mailto:alexszds@gmail.com">alexszds@gmail.com</a>), <a href="https://github.com/Brunadisner">Bruna Gabriela Disner</a>(<a href="mailto:bruna.disner@gmail.com">bruna.disner@gmail.com</a>), <a href="https://github.com/patitrev">Patrícia Trevisan</a>(<a href="mailto:patitrev@gmail.com">patitrev@gmail.com</a>) e <a href="https://github.com/rflgf">Rafael Fernandes</a>(<a href="mailto:rflgf0@gmail.com">rflgf0@gmail.com</a>).
 
 
 ## **Como rodar**
