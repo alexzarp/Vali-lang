@@ -589,6 +589,7 @@ public class Parser {
                 while (condicional) {
                     indiceAbsoluto = comparador.end();
                     Variavel.novoEscopo();
+                    //System.out.println(codigoFonte.charAt(indiceAbsoluto));
                     resolveCorpo(indiceAbsoluto, indiceFechaChaves - 2);
                     Variavel.removeEscopo();
                     indiceAbsoluto = iniciodobloco;
@@ -605,14 +606,14 @@ public class Parser {
         return false;
     }
 
-    public boolean verificaPara() throws Erro {
+    /*public boolean verificaPara() throws Erro {
         Matcher comparador = Pattern.compile("para\\s*\\(").matcher(codigoFonte);
         if (comparador.find(indiceAbsoluto) && comparador.start() == indiceAbsoluto) {
 
             
 
         }
-    }
+    }*/
 
     // O nosso print(); que se chama imprime();
     public boolean verificaImprimeTexto() throws Erro {

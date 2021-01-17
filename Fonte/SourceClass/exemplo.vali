@@ -1,6 +1,13 @@
 inteiro a = 0;
 
-enquanto(a < 5) {
-    imprime(a);
+enquanto(a < 3) {
+    imprime("a possui o valor " + a);
     a = a + 1;
+
+    enquanto (a < 2) {
+        imprime ("deu certo");
+        a = a + 1;
+        
+    }
+
 }
