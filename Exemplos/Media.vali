@@ -1,0 +1,6 @@
+inteiro a = 10;
+inteiro b = 9;
+inteiro media;
+media = a+b;
+inteiro resultado = media/2;
+imprime("A media eh " + resultado);

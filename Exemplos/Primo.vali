@@ -1,0 +1,14 @@
+inteiro primo = 6;
+inteiro i = 2;
+inteiro cont = 0;
+
+
+enquanto(i<primo){
+    se(primo/i == 0){
+        cont = 1 + cont;
+    }
+    i = i+1;
+}
+se(cont==0){
+    imprime("Eh primo " + primo);
+}
