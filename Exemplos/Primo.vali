@@ -1,4 +1,4 @@
-inteiro primo = 6;
+inteiro primo = 4;
 inteiro i = 2;
 inteiro cont = 0;
 inteiro aux;
@@ -6,11 +6,14 @@ inteiro aux;
 
 enquanto(i<primo){
     aux = primo%i;
+    imprime(aux);
     se(aux == 0){
         cont = 1 + cont;
+        imprime("teste"+cont);
     }
     i = i+1;
 }
+imprime(cont);
 se(cont==0){
     imprime("Eh primo " + primo);
 }
