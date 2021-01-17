@@ -1,6 +1,6 @@
-inteiro a = 10;
-inteiro b = 9;
-inteiro media;
+flutuante a = 8.5;
+flutuante b = 6.5;
+flutuante media;
 media = a+b;
-inteiro resultado = media/2;
+flutuante resultado = media/2;
 imprime("A media eh " + resultado);
